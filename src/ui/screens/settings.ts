@@ -8,7 +8,15 @@
 
 import type { Settings } from '@/core/save';
 import { el } from '../dom';
-import { button, panel, section, slider, toggle, type SliderHandle, type ToggleHandle } from '../widgets';
+import {
+  button,
+  panel,
+  section,
+  slider,
+  toggle,
+  type SliderHandle,
+  type ToggleHandle,
+} from '../widgets';
 import type { Screen, UiContext } from './types';
 
 type VolumeKey = 'masterVolume' | 'musicVolume' | 'sfxVolume';

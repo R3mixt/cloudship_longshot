@@ -61,14 +61,30 @@ export function runBot(options: BotOptions): RunStats {
   return s.stats;
 }
 
+/**
+ * Decides whether to spend a charge this frame.
+ *
+ * Skill is modelled as *judgement*, not reaction speed. A practised player waits
+ * for the moment that pays and a novice fires on impulse — usually too early,
+ * while the technique is still climbing and the ability has nothing to save.
+ * Modelling low skill as hesitation instead had it accidentally playing better,
+ * because waiting is what the good line looks like.
+ */
 function decideAbility(sim: Simulation, skill: number, rng: Rng): void {
   const s = sim.state;
   if (s.phase !== 'fly' || s.charges <= 0 || s.isEithan) return;
-  // Reaction jitter: a weaker player fires late or not at all.
-  if (rng.next() > 0.35 + skill * 0.65) return;
 
   const altitude = altitudeMeters(s.y);
   const falling = s.vy > 0;
+
+  // Impulse casts: frequent for a novice, vanishing for an expert.
+  const impulse = (1 - skill) * 0.02;
+  if (rng.chance(impulse)) {
+    sim.useAbility();
+    return;
+  }
+  // Even on the right moment, a novice hesitates some of the time.
+  if (rng.next() > 0.55 + skill * 0.45) return;
 
   switch (s.character) {
     case 'lindon':

@@ -144,7 +144,10 @@ export function createUi(root: HTMLElement, api: AppApi): UiHandle {
 
     const direction = ARROWS[event.key];
     if (!direction) return;
-    if ((direction === 'left' || direction === 'right') && ownsHorizontalArrows(document.activeElement)) {
+    if (
+      (direction === 'left' || direction === 'right') &&
+      ownsHorizontalArrows(document.activeElement)
+    ) {
       return;
     }
     event.preventDefault();

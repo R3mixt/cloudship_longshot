@@ -114,7 +114,9 @@ export function createResultsScreen(ctx: UiContext): Screen {
     pendingDistance = stats.distance;
     heroValue.textContent = fmt.group(stats.distance);
     heroAside.textContent =
-      stats.distance >= 1000 ? fmt.distance(stats.distance) : `${stats.flightTime.toFixed(1)}s aloft`;
+      stats.distance >= 1000
+        ? fmt.distance(stats.distance)
+        : `${stats.flightTime.toFixed(1)}s aloft`;
 
     score.setValue(fmt.group(stats.score));
     beasts.setValue(fmt.group(stats.beasts));

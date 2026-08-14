@@ -125,11 +125,23 @@
     linear-gradient(var(--c-gold) 0 0), linear-gradient(var(--c-gold) 0 0);
   background-repeat: no-repeat;
   background-size:
-    9px 2px, 2px 9px, 9px 2px, 2px 9px,
-    9px 2px, 2px 9px, 9px 2px, 2px 9px;
+    9px 2px,
+    2px 9px,
+    9px 2px,
+    2px 9px,
+    9px 2px,
+    2px 9px,
+    9px 2px,
+    2px 9px;
   background-position:
-    left top, left top, right top, right top,
-    left bottom, left bottom, right bottom, right bottom;
+    left top,
+    left top,
+    right top,
+    right top,
+    left bottom,
+    left bottom,
+    right bottom,
+    right bottom;
   opacity: 0.55;
 }
 

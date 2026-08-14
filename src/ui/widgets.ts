@@ -38,7 +38,11 @@ export interface PanelHandle {
 
 export function panel(options: PanelOptions): PanelHandle {
   const titleId = `ui-title-${options.id}`;
-  const heading = el('h1', { className: 'ui-panel__title', text: options.title, attrs: { id: titleId } });
+  const heading = el('h1', {
+    className: 'ui-panel__title',
+    text: options.title,
+    attrs: { id: titleId },
+  });
   const subtitle = el('p', {
     className: 'ui-panel__subtitle',
     text: options.subtitle ?? '',
@@ -118,11 +122,7 @@ export function button(options: ButtonOptions): HTMLButtonElement {
   if (options.sub === undefined) sub.hidden = true;
 
   const node = el('button', {
-    className: [
-      'ui-btn',
-      `ui-btn--${options.variant ?? 'secondary'}`,
-      options.className ?? '',
-    ]
+    className: ['ui-btn', `ui-btn--${options.variant ?? 'secondary'}`, options.className ?? '']
       .filter(Boolean)
       .join(' '),
     attrs: { type: 'button' },
@@ -190,7 +190,11 @@ export function statRow(
 ): StatRowHandle {
   const valueNode = el('b', { className: 'ui-stat__value', text: value });
   const root = el('div', {
-    className: ['ui-stat', options.accent ? 'ui-stat--accent' : '', options.hero ? 'ui-stat--hero' : '']
+    className: [
+      'ui-stat',
+      options.accent ? 'ui-stat--accent' : '',
+      options.hero ? 'ui-stat--hero' : '',
+    ]
       .filter(Boolean)
       .join(' '),
     children: [el('span', { className: 'ui-stat__label', text: label }), valueNode],
@@ -313,10 +317,7 @@ export function slider(options: SliderOptions): SliderHandle {
 
   const root = el('div', {
     className: 'ui-slider',
-    children: [
-      el('div', { className: 'ui-slider__head', children: [label, readout] }),
-      input,
-    ],
+    children: [el('div', { className: 'ui-slider__head', children: [label, readout] }), input],
   });
 
   return {
@@ -385,7 +386,11 @@ export function toggle(options: ToggleOptions): ToggleHandle {
 /* Layout helpers                                                      */
 /* ------------------------------------------------------------------ */
 
-export function section(title: string, children: Array<Node | null>, options: ElOptions = {}): HTMLElement {
+export function section(
+  title: string,
+  children: Array<Node | null>,
+  options: ElOptions = {},
+): HTMLElement {
   return el('section', {
     ...options,
     className: ['ui-section', options.className ?? ''].filter(Boolean).join(' '),

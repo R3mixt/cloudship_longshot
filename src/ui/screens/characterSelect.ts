@@ -3,30 +3,18 @@
  *
  * Four techniques as full-width cards, then the hidden fifth slot. The locked
  * slot is followed by a bar per character showing how far each one still has to
- * fly, which turns "reach 100 km with all four" from an opaque wall into a
+ * fly, which turns the hundred-kilometre gate from an opaque wall into a
  * checklist the player can watch fill.
  */
 
-import {
-  CHARACTERS,
-  UNLOCK_CHARACTERS,
-  UNLOCK_KM,
-  type CharacterId,
-} from '@/data/characters';
+import { CHARACTERS, UNLOCK_CHARACTERS, UNLOCK_KM, type CharacterId } from '@/data/characters';
 import { pulse } from '../anim';
 import { el } from '../dom';
 import * as fmt from '../format';
 import { lockGlyph, verbGlyph } from '../glyphs';
 import { cardRecordLine, characterName } from '../labels';
 import { accentFor, applyAccent, COLORS } from '../theme';
-import {
-  button,
-  panel,
-  progressBar,
-  replace,
-  setButtonSub,
-  type ProgressHandle,
-} from '../widgets';
+import { button, panel, progressBar, replace, setButtonSub, type ProgressHandle } from '../widgets';
 import type { Screen, UiContext } from './types';
 
 const PLAYABLE: CharacterId[] = ['lindon', 'yerin', 'mercy', 'ziel'];
@@ -66,16 +54,14 @@ export function createCharacterSelectScreen(ctx: UiContext): Screen {
   };
 
   const cards: CardHandle[] = PLAYABLE.map((id) => buildCard(id, () => select(id)));
-  const eithanCard = buildEithanCard(
-    () => {
-      if (!ctx.api.isEithanUnlocked()) {
-        ctx.api.playSound('ui.locked');
-        pulse(eithanCard.root, 'is-refused');
-        return;
-      }
-      select('eithan');
-    },
-  );
+  const eithanCard = buildEithanCard(() => {
+    if (!ctx.api.isEithanUnlocked()) {
+      ctx.api.playSound('ui.locked');
+      pulse(eithanCard.root, 'is-refused');
+      return;
+    }
+    select('eithan');
+  });
 
   const list = el('div', {
     className: 'ui-cards',
@@ -100,7 +86,7 @@ export function createCharacterSelectScreen(ctx: UiContext): Screen {
     children: [
       el('p', {
         className: 'ui-unlock__head',
-        text: `Every technique must reach ${UNLOCK_KM} km.`,
+        text: `Every technique must fly ${UNLOCK_KM} km in total.`,
       }),
       ...[...bars.values()].map((bar) => bar.root),
     ],
@@ -146,10 +132,12 @@ export function createCharacterSelectScreen(ctx: UiContext): Screen {
     eithanCard.setRecordLine(revealed ? 'Unranked — records unaffected' : '');
 
     unlock.hidden = revealed;
+    // The save manager owns the unlock rule; reading the fractions from it keeps
+    // the bar and the gate from ever disagreeing about what counts.
+    const progress = new Map(ctx.api.save.unlockProgress().perCharacter);
     for (const [id, bar] of bars) {
-      const best = ctx.api.save.record(id).distance;
-      const fraction = Math.min(1, best / (UNLOCK_KM * 1000));
-      bar.set(fraction, `${fmt.kilometers(best)} / ${UNLOCK_KM} km`);
+      const flown = ctx.api.save.record(id).totalDistance;
+      bar.set(progress.get(id) ?? 0, `${fmt.kilometers(flown)} / ${UNLOCK_KM} km`);
     }
   };
 
@@ -224,7 +212,7 @@ function buildEithanCard(onActivate: () => void): CardHandle {
   const ability = el('span', { className: 'ui-card__ability', text: 'SEALED' });
   const trait = el('span', {
     className: 'ui-card__trait',
-    text: `Reach ${UNLOCK_KM} km with all four to reveal`,
+    text: `Fly ${UNLOCK_KM} km in total with all four to reveal`,
   });
   const recordLine = el('span', { className: 'ui-card__record' });
 

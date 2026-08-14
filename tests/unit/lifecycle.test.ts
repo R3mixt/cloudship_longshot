@@ -124,13 +124,13 @@ describe('a complete run', () => {
   });
 
   /**
-   * Documented defect. `topSpeed` is sampled once per frame during the motion
-   * integration, which runs before collisions are resolved, so the speed a
-   * pickup adds is only ever seen on the following frame — after drag has
-   * already eaten into it. The results screen therefore under-reports the true
-   * peak, and loses it entirely if the run ends on the boosting frame.
+   * Regression guard. Sampling `topSpeed` only during motion integration — which
+   * runs before collisions resolve — meant a pickup's speed was first seen a
+   * frame later, after drag had eaten into it, and was lost entirely when the
+   * run ended on the boosting frame. The results screen under-reported the peak
+   * exactly on the runs where it mattered most.
    */
-  it.fails('records the peak speed a collision boost produces', () => {
+  it('records the peak speed a collision boost produces', () => {
     const sim = flightSim({ character: 'ziel', x: 3000, y: 200, vx: 300, vy: 0 });
     const before = sim.state.stats.topSpeed;
     plantGoldenBeast(sim);

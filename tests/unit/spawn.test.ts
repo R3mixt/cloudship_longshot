@@ -361,25 +361,25 @@ describe('difficulty ramp', () => {
   });
 
   /**
-   * Documented defect. The spawn table is a cumulative roll evaluated in order,
-   * and the hazard ramp widens hazard thresholds without shifting the entries
-   * behind them, so each hazard eventually swallows the window of the reward
-   * that follows it. Golden beasts sit directly behind armoured beasts and are
-   * the first casualty.
+   * Regression guard. The spawn table is a cumulative roll evaluated in order,
+   * so widening a hazard's threshold in place pushes it into the window of the
+   * reward behind it and deletes that reward outright past a certain distance.
+   * Golden beasts sit directly behind armoured beasts and were the first
+   * casualty, disappearing entirely beyond about a kilometre.
    */
-  it.fails('still spawns golden beasts on a kilometre-scale run', () => {
+  it('still spawns golden beasts on a kilometre-scale run', () => {
     const counts = countByKind(sampleAt(3000, 800));
     expect(counts.rare ?? 0).toBeGreaterThan(0);
   });
 
-  /** Same defect: formation pads sit behind storms and vanish past ~2150 m. */
-  it.fails('still spawns formation pads on a kilometre-scale run', () => {
+  /** Same failure mode: formation pads sit behind storms in the table. */
+  it('still spawns formation pads on a kilometre-scale run', () => {
     const counts = countByKind(sampleAt(3000, 800));
     expect(counts.pad ?? 0).toBeGreaterThan(0);
   });
 
-  /** Same defect: the Thousand-Mile Cloud table entry sits behind spikes. */
-  it.fails('still spawns Thousand-Mile Clouds from the main table past 2 km', () => {
+  /** Same failure mode: the Thousand-Mile Cloud entry sits behind spikes. */
+  it('still spawns Thousand-Mile Clouds from the main table past 2 km', () => {
     const spawner = new Spawner(new Rng(SEED));
     const startX = xAt(3000);
     const out: WorldObject[] = [];
@@ -390,14 +390,23 @@ describe('difficulty ramp', () => {
     expect(fromTable.length).toBeGreaterThan(0);
   });
 
-  it('records the distances at which the reward windows close', () => {
-    const windowClosesAt = (rewardThreshold: number, hazardThreshold: number) =>
-      SPAWN.hazardRampStartMeters +
-      (rewardThreshold - hazardThreshold) / SPAWN.hazardRampPerMeter;
-    // Kept as executable documentation of the defect above.
-    expect(windowClosesAt(0.775, 0.75)).toBeCloseTo(1025, 6); // golden beasts
-    expect(windowClosesAt(0.64, 0.58)).toBeCloseTo(1900, 6); // Thousand-Mile Clouds
-    expect(windowClosesAt(0.5, 0.43)).toBeCloseTo(2150, 6); // formation pads
+  it('keeps every reward reachable at the maximum hazard ramp', () => {
+    // At full ramp the hazard slices are at their widest. Every non-hazard entry
+    // must still own a non-zero slice of the roll, which is the property that
+    // widening thresholds in place used to violate.
+    let cumulative = 0;
+    let previous = 0;
+    for (const entry of SPAWN_TABLE) {
+      const width = entry.threshold - previous;
+      previous = entry.threshold;
+      const isHazard = entry.kind === 'storm' || entry.kind === 'spike' || entry.kind === 'armor';
+      const scaled = isHazard ? width * (1 + SPAWN.hazardRampMax) : width;
+      expect(scaled).toBeGreaterThan(0);
+      cumulative += scaled;
+    }
+    // Hazards taking a larger share must not push the table past certainty,
+    // which would starve the empty-chunk case that paces the world.
+    expect(cumulative).toBeLessThan(1);
   });
 });
 

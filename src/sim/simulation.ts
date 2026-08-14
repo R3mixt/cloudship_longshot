@@ -257,6 +257,11 @@ export class Simulation {
     if (!this.resolveGround(step)) return false;
     this.resolveObjects(step);
 
+    // Sampled after collisions: a golden beast or a completed hunt can more than
+    // double the speed on the frame it lands, and sampling before would either
+    // miss it entirely or report it a frame late, already worn down by drag.
+    s.stats.topSpeed = Math.max(s.stats.topSpeed, Math.hypot(s.vx, s.vy));
+
     this.generate();
     return true;
   }

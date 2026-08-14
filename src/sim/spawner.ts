@@ -200,6 +200,7 @@ export class Spawner {
       const roll = R.next();
 
       // Hazard density creeps up with distance so kilometre runs demand skill.
+      // Expressed as a fractional widening of each hazard's slice of the table.
       const ramp =
         distanceM <= SPAWN.hazardRampStartMeters
           ? 0
@@ -211,13 +212,22 @@ export class Spawner {
       if (destroyer && roll < SPAWN.destroyerBirdThreshold) {
         this.spawnFlock(out, genX, this.pickAltitudeY(2));
       } else {
+        // Walk the cumulative table. An entry whose gate has not opened yet
+        // falls through to the next candidate rather than consuming the roll —
+        // otherwise the early world is full of holes where the ungated hazards
+        // would have been.
+        let cumulative = 0;
+        let previous = 0;
         for (const entry of SPAWN_TABLE) {
-          const isHazard = entry.kind === 'storm' || entry.kind === 'spike' || entry.kind === 'armor';
-          const threshold = isHazard ? entry.threshold + ramp : entry.threshold;
-          if (roll < threshold) {
-            if (distanceM > entry.gateMeters) {
-              this.spawnKind(out, entry.kind, genX, entry.minAltitude);
-            }
+          const width = entry.threshold - previous;
+          previous = entry.threshold;
+          // Hazard windows widen with distance. Widening in place would push each
+          // hazard into the window of the entry behind it and delete that reward
+          // outright, so the whole table is rebuilt from widened slices instead.
+          cumulative += isHazard(entry.kind) ? width * (1 + ramp) : width;
+          if (roll >= cumulative) continue;
+          if (distanceM > entry.gateMeters) {
+            this.spawnKind(out, entry.kind, genX, entry.minAltitude);
             break;
           }
         }
@@ -266,6 +276,10 @@ export class Spawner {
 
     return genX;
   }
+}
+
+function isHazard(kind: string): boolean {
+  return kind === 'storm' || kind === 'spike' || kind === 'armor';
 }
 
 /** Resets object id allocation. Used by tests to keep ids stable across runs. */

@@ -19,9 +19,17 @@ interface StepCopy {
 }
 
 const STEPS: StepCopy[] = [
-  { kind: 'charge', title: 'HOLD', body: 'Charge the launch. Release on the gold mark for a perfect shot.' },
+  {
+    kind: 'charge',
+    title: 'HOLD',
+    body: 'Charge the launch. Release on the gold mark for a perfect shot.',
+  },
   { kind: 'aim', title: 'DRAG', body: 'Drag to set the angle before you let go.' },
-  { kind: 'tap', title: 'TAP', body: 'Tap in flight to spend a charge on your technique. Three per run.' },
+  {
+    kind: 'tap',
+    title: 'TAP',
+    body: 'Tap in flight to spend a charge on your technique. Three per run.',
+  },
 ];
 
 interface LegendCopy {

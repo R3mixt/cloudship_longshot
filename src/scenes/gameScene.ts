@@ -12,6 +12,7 @@ import { EffectsRenderer } from '@/render/effects';
 import { GroundRenderer } from '@/render/ground';
 import { Hud } from '@/render/hud';
 import { ObjectRenderer } from '@/render/objects';
+import { DebugOverlay } from '@/render/debugOverlay';
 import { SkyRenderer } from '@/render/sky';
 import { MAX_STEP, Simulation } from '@/sim/simulation';
 import type { SimEvent, SimState } from '@/sim/types';
@@ -35,6 +36,7 @@ const DEPTH = {
   effects: 50,
   hud: 60,
   flash: 70,
+  debug: 80,
 };
 
 /**
@@ -51,6 +53,7 @@ export class GameScene extends Phaser.Scene {
   private actors!: ActorRenderer;
   private effects!: EffectsRenderer;
   private hud!: Hud;
+  private debugOverlay: DebugOverlay | null = null;
   private flash!: Phaser.GameObjects.Rectangle;
 
   private camX = 0;
@@ -95,6 +98,10 @@ export class GameScene extends Phaser.Scene {
       .setDepth(DEPTH.flash)
       .setScrollFactor(0)
       .setAlpha(0);
+
+    if (debug.enabled && (debug.hitboxes || debug.fps)) {
+      this.debugOverlay = new DebugOverlay(this, DEPTH.debug, debug.hitboxes, debug.fps);
+    }
 
     this.effects.intensity = settings.reducedEffects ? 0.35 : 1;
     this.actors.showSpeedLines = settings.showSpeedLines;
@@ -163,6 +170,7 @@ export class GameScene extends Phaser.Scene {
     this.actors.destroy();
     this.effects.destroy();
     this.hud.destroy();
+    this.debugOverlay?.destroy();
   }
 
   // ---------------------------------------------------------------- input
@@ -295,6 +303,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.applyShake(dt);
+    this.debugOverlay?.update(state, this.camX, this.camY, dt * 1000, this.effects.activeCount);
   }
 
   private applyShake(dt: number): void {

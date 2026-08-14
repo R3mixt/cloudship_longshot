@@ -118,6 +118,25 @@ npm run dev
 
 Then open the URL Vite prints (`http://localhost:5173` by default).
 
+## Debug mode
+
+Append `?debug=1` to the URL to enable the development overlay. It is off in every normal load and
+none of it ships into a release build's hot path.
+
+| Parameter | Effect |
+| --- | --- |
+| `?debug=1` | Enables debug mode and the frame-time / object-count readout |
+| `&hitboxes=1` | Draws collision shapes, including the seeker's lock radius |
+| `&fps=0` | Suppresses the readout while keeping the other flags |
+| `&slow=1` | Quarter-speed simulation for inspecting a single interaction |
+| `&charges=inf` | Ability charges never deplete |
+| `&unlock=1` | Reveals the fifth character slot |
+| `&seed=12345` | Fixes the world generator so a run reproduces exactly |
+| `&spawn=rare` | Fills the world with one object kind — any of `bird`, `orb`, `storm`, `pad`, `spike`, `tmc`, `aura`, `armor`, `rare` |
+
+For example, `?debug=1&hitboxes=1&spawn=armor&charges=inf` is the fastest way to check every
+technique against armoured beasts.
+
 ## Project structure
 
 The game is organised so that every tunable number lives in a data module and no gameplay value is

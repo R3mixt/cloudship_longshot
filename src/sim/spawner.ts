@@ -1,3 +1,4 @@
+import { debug } from '@/core/debug';
 import { Rng } from '@/core/rng';
 import { OBJECTS, type AuraVariant } from '@/data/objects';
 import { ALTITUDE_BANDS, SPAWN, SPAWN_TABLE } from '@/data/spawn';
@@ -208,6 +209,15 @@ export class Spawner {
               SPAWN.hazardRampMax,
               (distanceM - SPAWN.hazardRampStartMeters) * SPAWN.hazardRampPerMeter,
             );
+
+      if (debug.forceSpawn) {
+        // Reproduces one interaction on demand: ?debug=1&spawn=rare fills the
+        // world with golden beasts and nothing else.
+        const forced = SPAWN_TABLE.find((e) => e.kind === debug.forceSpawn);
+        if (forced) this.spawnKind(out, forced.kind, genX, forced.minAltitude);
+        genX += SPAWN.spacingBase;
+        continue;
+      }
 
       if (destroyer && roll < SPAWN.destroyerBirdThreshold) {
         this.spawnFlock(out, genX, this.pickAltitudeY(2));

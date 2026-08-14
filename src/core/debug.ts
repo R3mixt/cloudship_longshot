@@ -12,6 +12,8 @@ export interface DebugFlags {
   unlockKm: number | null;
   /** Fixed RNG seed for reproducible runs. */
   seed: number | null;
+  /** Forces every spawn chunk to place this object kind. */
+  forceSpawn: string | null;
 }
 
 function read(): DebugFlags {
@@ -24,6 +26,7 @@ function read(): DebugFlags {
     forceUnlock: false,
     unlockKm: null,
     seed: null,
+    forceSpawn: null,
   };
   if (typeof globalThis.location === 'undefined') return off;
   const params = new URLSearchParams(globalThis.location.search);
@@ -43,6 +46,7 @@ function read(): DebugFlags {
     forceUnlock: params.get('unlock') === '1',
     unlockKm: numParam('unlockkm'),
     seed: numParam('seed'),
+    forceSpawn: params.get('spawn'),
   };
 }
 

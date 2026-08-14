@@ -66,7 +66,7 @@ which character you brought.
 | **Yerin**  | `SWORD SEEKER`      | Darts forward and strikes the first beast ahead, cutting through whatever is in the way.                   |
 | **Mercy**  | `SHADOW STRINGS`    | Near-weightless glide with a gentle forward pull. The recovery tool when an arc goes wrong.                |
 | **Ziel**   | `CONJURE FORMATION` | A rune pad flashes into being beneath the technique and slams it upward, harder than any ground formation. |
-| **???**    | Locked              | A fifth character unlocks once you have flown **100 km in total with each** of the four above.            |
+| **???**    | Locked              | A fifth character unlocks once you have flown **10 km in total with each** of the four above.             |
 
 Per-character personal bests are tracked separately, so there is a record to chase on each one.
 

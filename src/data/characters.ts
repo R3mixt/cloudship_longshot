@@ -180,4 +180,4 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
 export const UNLOCK_CHARACTERS: CharacterId[] = ['lindon', 'yerin', 'mercy', 'ziel'];
 
 /** Kilometres each of the four must reach before Eithan is revealed. */
-export const UNLOCK_KM = 100;
+export const UNLOCK_KM = 10;

@@ -265,12 +265,12 @@ export class SaveManager {
    * character.
    *
    * The threshold is measured against *lifetime* distance flown rather than a
-   * single best run. The flight model's sustained equilibrium is about 105 m/s,
-   * so covering 100 km without touching down would take roughly sixteen minutes
-   * — far outside the thirty-second-to-three-minute run the game is built
-   * around. Cumulative distance keeps the number, the four-character
-   * requirement and the long-haul intent, and makes the reward something a
-   * dedicated player actually reaches.
+   * single best run, so it accumulates across attempts instead of demanding one
+   * exceptional flight. At the flight model's sustained equilibrium of about
+   * 105 m/s the 10 km gate is roughly a minute and a half of airtime per
+   * character — a handful of ordinary runs each, which playtesting put in the
+   * right place. The four-character requirement is what carries the intent:
+   * the reward is for flying the whole roster, not for grinding one.
    */
   unlockProgress(): { unlocked: boolean; perCharacter: Array<[CharacterId, number]> } {
     const target = UNLOCK_KM * 1000;

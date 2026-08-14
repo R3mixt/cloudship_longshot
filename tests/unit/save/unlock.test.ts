@@ -124,8 +124,9 @@ describe('unlockProgress', () => {
   });
 
   it('measures lifetime distance flown, not a single best run', () => {
-    // The port deliberately gates on cumulative distance: a single 100 km flight
-    // is far longer than the run lengths the game is built around.
+    // The gate is deliberately cumulative: a personal best that clears the
+    // threshold on its own must still not unlock anything, because the reward is
+    // for time spent on the character rather than for one good flight.
     for (const id of UNLOCK_CHARACTERS) {
       save.update((data) => {
         data.records[id] = { ...emptyRecord(), distance: TARGET * 2, totalDistance: 0 };
@@ -165,8 +166,8 @@ describe('unlockProgress', () => {
 });
 
 describe('the unlock configuration', () => {
-  it('ships at 100 km', () => {
-    expect(UNLOCK_KM).toBe(100);
+  it('ships at 10 km', () => {
+    expect(UNLOCK_KM).toBe(10);
   });
 
   it('gates on exactly the four playable characters', () => {

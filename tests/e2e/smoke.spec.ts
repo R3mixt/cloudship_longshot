@@ -7,6 +7,7 @@
  */
 
 import {
+  advanceFrames,
   bootGame,
   dialogTitle,
   expect,
@@ -80,6 +81,15 @@ test.describe('smoke', () => {
     await page.keyboard.press('Enter');
     await expect(openDialog(page)).toHaveCount(0);
     await expectPhase(page, 'aim');
+
+    // KNOWN SOURCE ISSUE — src/scenes/gameScene.ts:210-213.
+    // Enter and Space share one charge latch, and the keyup of the keypress
+    // that activated PLAY is still queued in the engine when the run goes live.
+    // Pressing Space inside that window charges and is released again in the
+    // same engine tick, launching at zero power. Letting the engine drain the
+    // activation frame sidesteps it; delete this once the latch remembers which
+    // key opened it. See docs/E2E_NOTES.md, "Known issues".
+    await advanceFrames(page, 3);
 
     await page.keyboard.down('Space');
     await expect

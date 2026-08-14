@@ -27,6 +27,10 @@ export interface GameSceneData {
   onReady: (scene: GameScene) => void;
 }
 
+/** Radians per tap of an aim key, and radians per second while one is held. */
+const AIM_KEY_STEP = 0.05;
+const AIM_KEY_RATE = 1.1;
+
 const DEPTH = {
   sky: 0,
   ground: 10,
@@ -74,6 +78,10 @@ export class GameScene extends Phaser.Scene {
   private recordDistance = 0;
   private inputEnabled = false;
   private endDelay = 0;
+  private aimKeys: { up: Phaser.Input.Keyboard.Key[]; down: Phaser.Input.Keyboard.Key[] } = {
+    up: [],
+    down: [],
+  };
 
   constructor() {
     super(GAME_SCENE);
@@ -209,6 +217,25 @@ export class GameScene extends Phaser.Scene {
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
 
+    // Aim keys are resolved once. Held keys ramp the angle smoothly while a
+    // single tap nudges it a fixed step, so the game is playable with discrete
+    // key presses and not only by holding a key down.
+    const KeyCodes = Phaser.Input.Keyboard.KeyCodes;
+    this.aimKeys = {
+      up: [keyboard.addKey(KeyCodes.UP), keyboard.addKey(KeyCodes.W)],
+      down: [keyboard.addKey(KeyCodes.DOWN), keyboard.addKey(KeyCodes.S)],
+    };
+    for (const [event, direction] of [
+      ['keydown-UP', -1],
+      ['keydown-W', -1],
+      ['keydown-DOWN', 1],
+      ['keydown-S', 1],
+    ] as const) {
+      keyboard.on(event, () => {
+        if (this.inputEnabled && !this.paused) this.sim.aimBy(direction * AIM_KEY_STEP);
+      });
+    }
+
     keyboard.on('keydown-SPACE', () => this.onActionDown());
     keyboard.on('keyup-SPACE', () => this.onActionUp());
     keyboard.on('keydown-ENTER', () => this.onActionDown());
@@ -239,12 +266,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   private pollKeyboardAim(dt: number): void {
-    const keyboard = this.input.keyboard;
-    if (!keyboard || !this.inputEnabled || this.sim.state.phase !== 'aim') return;
-    const cursors = keyboard.createCursorKeys();
-    const rate = 1.1 * dt;
-    if (cursors.up?.isDown || keyboard.checkDown(keyboard.addKey('W'), 0)) this.sim.aimBy(-rate);
-    if (cursors.down?.isDown || keyboard.checkDown(keyboard.addKey('S'), 0)) this.sim.aimBy(rate);
+    if (!this.inputEnabled || this.sim.state.phase !== 'aim') return;
+    const rate = AIM_KEY_RATE * dt;
+    if (this.aimKeys.up.some((k) => k.isDown)) this.sim.aimBy(-rate);
+    if (this.aimKeys.down.some((k) => k.isDown)) this.sim.aimBy(rate);
   }
 
   // ---------------------------------------------------------------- update

@@ -67,7 +67,10 @@ interface AppHook {
   getCharacter(): string;
   isEithanUnlocked(): boolean;
   grantDevUnlock(): void;
-  game: { scene: { getScene(key: string): { simulation: SimulationHook } | null } };
+  game: {
+    loop: { frame: number };
+    scene: { getScene(key: string): { simulation: SimulationHook } | null };
+  };
 }
 
 /**
@@ -214,6 +217,28 @@ export async function expectPhase(page: Page, phase: SimStateHook['phase']): Pro
   await expect
     .poll(async () => (await simState(page)).phase, { message: `run phase should be "${phase}"` })
     .toBe(phase);
+}
+
+/**
+ * Waits for the engine to render `count` more frames.
+ *
+ * This is a condition on the game loop, not a sleep: it is the only way to say
+ * "let the engine finish digesting what just happened" without guessing at a
+ * duration.
+ */
+export async function advanceFrames(page: Page, count = 3): Promise<void> {
+  const start = await page.evaluate(() => {
+    const hook = (globalThis as unknown as CloudshipGlobal).__cloudship;
+    if (!hook) throw new Error('game is not booted');
+    return hook.app.game.loop.frame;
+  });
+  await page.waitForFunction(
+    ([from, wanted]) => {
+      const hook = (globalThis as unknown as CloudshipGlobal).__cloudship;
+      return !!hook && hook.app.game.loop.frame >= from + wanted;
+    },
+    [start, count] as const,
+  );
 }
 
 /** Starts a run from the menu through the real PLAY button. */

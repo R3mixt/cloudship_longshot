@@ -17,7 +17,14 @@ export const WORLD = {
   /** World Y of the ground plane. Positive Y is down. */
   groundY: 400,
 
-  /** Cloudship deck position — the launch origin. 300 m above the ground. */
+  /**
+   * Cloudship deck position — the launch origin.
+   *
+   * The offset is 300 world pixels, which at 9 px per metre puts the deck about
+   * 33 m up on the altimeter. This is the reference prototype's geometry and the
+   * launch arc is tuned around it; raising the deck to a literal 300 m would
+   * multiply every descent and invalidate the whole balance pass.
+   */
   shipX: 46,
   shipDeckOffsetY: -300,
 

@@ -11,8 +11,8 @@ A free, ad-free browser game — a 2D pixel-art launch-and-fly arcade run set in
 
 ## What it is
 
-You are a sacred artist standing on the deck of a cloudship, roughly **300 metres above the
-ground**. You charge a technique, aim it, and let it go. The camera follows the projectile out
+You are a sacred artist standing on the deck of a cloudship, high above the ground. You charge a
+technique, aim it, and let it go. The camera follows the projectile out
 across an endless side-scrolling world while the sky throws boosts, drags, hazards and outright
 death at it. When the technique finally loses its momentum and settles, the run ends at whatever
 distance it reached.

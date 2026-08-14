@@ -27,6 +27,8 @@ export interface GameSceneData {
   onReady: (scene: GameScene) => void;
 }
 
+type ChargeKey = 'SPACE' | 'ENTER';
+
 /** Radians per tap of an aim key, and radians per second while one is held. */
 const AIM_KEY_STEP = 0.05;
 const AIM_KEY_RATE = 1.1;
@@ -74,7 +76,7 @@ export class GameScene extends Phaser.Scene {
   private pointerDownX = 0;
   private pointerActive = false;
   private pointerMoved = false;
-  private keyboardCharging = false;
+  private chargingKey: ChargeKey | null = null;
   private recordDistance = 0;
   private inputEnabled = false;
   private endDelay = 0;
@@ -161,6 +163,7 @@ export class GameScene extends Phaser.Scene {
     this.paused = false;
     this.endDelay = 0;
     this.pointerActive = false;
+    this.chargingKey = null;
 
     this.actors.reset();
     this.actors.setCharacter(character);
@@ -236,10 +239,10 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    keyboard.on('keydown-SPACE', () => this.onActionDown());
-    keyboard.on('keyup-SPACE', () => this.onActionUp());
-    keyboard.on('keydown-ENTER', () => this.onActionDown());
-    keyboard.on('keyup-ENTER', () => this.onActionUp());
+    keyboard.on('keydown-SPACE', () => this.onActionDown('SPACE'));
+    keyboard.on('keyup-SPACE', () => this.onActionUp('SPACE'));
+    keyboard.on('keydown-ENTER', () => this.onActionDown('ENTER'));
+    keyboard.on('keyup-ENTER', () => this.onActionUp('ENTER'));
     keyboard.on('keydown-ESC', () => {
       if (this.inputEnabled && this.running) this.config.onPauseRequested();
     });
@@ -248,20 +251,29 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private onActionDown(): void {
+  private onActionDown(key: ChargeKey): void {
     if (!this.inputEnabled || !this.running || this.paused) return;
     const phase = this.sim.state.phase;
-    if (phase === 'aim' && !this.keyboardCharging) {
-      this.keyboardCharging = true;
+    if (phase === 'aim' && this.chargingKey === null) {
+      this.chargingKey = key;
       this.sim.setCharging(true);
     } else if (phase === 'fly') {
       this.sim.useAbility();
     }
   }
 
-  private onActionUp(): void {
-    if (!this.keyboardCharging) return;
-    this.keyboardCharging = false;
+  /**
+   * Releases the charge only for the key that started it.
+   *
+   * Enter and Space both charge, and the interface starts a run on Enter. The
+   * keyup from that same Enter press arrives after the run is already live, and
+   * a shared latch read it as the release of a charge Space had just begun —
+   * launching at zero power. Tracking which key opened the latch makes the
+   * keyboard path deterministic no matter how fast the two presses overlap.
+   */
+  private onActionUp(key: ChargeKey): void {
+    if (this.chargingKey !== key) return;
+    this.chargingKey = null;
     if (this.running && this.sim.state.phase === 'aim') this.sim.launch();
   }
 

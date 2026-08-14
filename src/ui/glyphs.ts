@@ -186,8 +186,9 @@ function diagram(children: SVGElement[]): SVGSVGElement {
     'svg',
     {
       viewBox: '0 0 64 40',
-      width: '100%',
-      height: 'auto',
+      // Sizing lives in the stylesheet. `height="auto"` is not a valid SVG
+      // presentation attribute — only CSS accepts the keyword — and Chromium
+      // logs an attribute error for every diagram when it is set here.
       'shape-rendering': 'crispEdges',
       focusable: 'false',
       'aria-hidden': 'true',

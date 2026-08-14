@@ -68,6 +68,29 @@ export class AppController implements AppApi {
 
     this.game.registry.set('gameSceneData', sceneData);
     this.game.scene.start(PRELOAD_SCENE);
+    this.watchViewport();
+  }
+
+  /**
+   * Forces the scale manager to re-fit after a viewport change.
+   *
+   * On mobile browsers an orientation change can leave the manager's recorded
+   * parent size matching the DOM while the computed display size still reflects
+   * the previous orientation. Its own change detection then sees nothing to do
+   * and the canvas stays wrong — measured at up to 44% of the world hanging off
+   * the edge after a rotate-and-rotate-back. An explicit refresh costs nothing
+   * and cannot latch.
+   */
+  private watchViewport(): void {
+    const refresh = () => {
+      this.game.scale.refresh();
+      // Some browsers report the new viewport a frame or two after the event.
+      setTimeout(() => this.game.scale.refresh(), 120);
+      setTimeout(() => this.game.scale.refresh(), 400);
+    };
+    window.addEventListener('resize', refresh);
+    window.addEventListener('orientationchange', refresh);
+    globalThis.screen?.orientation?.addEventListener?.('change', refresh);
   }
 
   attachUi(ui: UiHandle): void {

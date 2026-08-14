@@ -40,7 +40,12 @@ export const DEFAULT_QUERY = 'debug=1&seed=12345';
  * Delete this entry the moment the attribute moves into the stylesheet; it is
  * scoped to that exact message and can mask nothing else.
  */
-const KNOWN_SOURCE_ISSUES: RegExp[] = [/attribute height: Expected length, "auto"/];
+/**
+ * Console messages tolerated by the error collector. Empty is the goal: an entry
+ * here is a source defect that has been seen and not yet fixed, not a permanent
+ * exemption.
+ */
+const KNOWN_SOURCE_ISSUES: RegExp[] = [];
 
 /* ------------------------------------------------------------------ */
 /* Page hooks                                                          */

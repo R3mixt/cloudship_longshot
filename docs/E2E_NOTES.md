@@ -76,7 +76,9 @@ the test if either list is non-empty. It applies to every test that imports
 catches as many real regressions, so keep importing `test` from the fixtures
 module rather than from `@playwright/test`.
 
-One message is filtered, in `KNOWN_SOURCE_ISSUES`. See "Known issues" below.
+No messages are filtered. `KNOWN_SOURCE_ISSUES` in the fixtures is empty, and an
+entry there is meant to be a defect that has been seen and not yet fixed rather
+than a permanent exemption — see "Resolved issues" below.
 
 ## What is deliberately left to the unit suite
 
@@ -130,79 +132,39 @@ When a test fails because the console collector caught something, the message is
 in the failure body as `console.error: …` or `pageerror: …`; open the trace and
 look at the console tab around the last action.
 
-## Known issues
+## Resolved issues
 
-Three defects were found by this suite and are **not fixed here** — the source is
-owned elsewhere. Each is listed with its exact repro.
+Three source defects were found while writing this suite. All three are fixed;
+the workarounds each one required have been removed, and the tests that now
+cover them fail if the defect returns.
 
-### 1. `<svg height="auto">` logs a console error in Chromium
+### 1. `<svg height="auto">` logged a console error in Chromium
 
-`src/ui/glyphs.ts:190`. The three HOW TO PLAY diagrams set `height: 'auto'` as an
-SVG presentation attribute. Blink's attribute parser rejects `auto` and logs
-`<svg> attribute height: Expected length, "auto".` once per diagram. Firefox
-accepts it, and the diagrams render correctly in both.
+The three HOW TO PLAY diagrams set `width` and `height` as SVG presentation
+attributes. `auto` is a CSS keyword and is not valid there, so Chromium logged
+`<svg> attribute height: Expected length, "auto"` three times on every visit to
+the screen. Sizing already lived in the stylesheet, so the attributes were
+simply redundant. The navigation test's console assertion now covers it.
 
-Repro: load the game in Chromium, open HOW TO PLAY, look at the console — three
-errors.
+### 2. Enter on PLAY, then Space, launched at zero power
 
-Because of this the console collector filters that one message via
-`KNOWN_SOURCE_ISSUES` in `tests/e2e/fixtures.ts`. **Delete that entry** when the
-attribute moves into the stylesheet; the pattern is narrow enough that it can
-mask nothing else.
+Enter and Space shared a single charge latch that did not record which key had
+opened it. The interface starts a run on Enter, and that keypress's keyup was
+still queued in the engine when the run went live; a Space press inside that
+window was charged and released in the same engine tick, launching at zero
+power. The latch now remembers its key. `smoke.spec.ts` presses Space
+immediately after Enter with no settling delay, which is precisely the case that
+used to fail.
 
-### 2. Enter on PLAY, then Space, launches at zero power
+### 3. The canvas latched a stale fit on a mobile viewport change
 
-`src/scenes/gameScene.ts:239-242` — the four bindings in `bindInput` — with the
-latch itself in `onActionDown` (:251) and `onActionUp` (:262). Enter and Space
-are bound to the same handler pair and share one `keyboardCharging` latch, which
-does not record which key opened it. `inputEnabled` flips to `true` synchronously
-inside the PLAY button's click handler, while the keyup of that same keypress is
-still sitting in the engine's keyboard queue. When the queue drains, that stray
-keyup is treated as the release of the charge Space had just begun, and the
-technique launches at meter 0 — the weakest possible shot.
-
-Repro (about 100% in Chromium, ~75% in Firefox):
-
-1. Load the game and press Enter with PLAY focused.
-2. Press and hold Space immediately, within one engine frame.
-3. The run is already in the fly phase with `meter === 0`.
-
-Controls that isolate it: starting the run with a **mouse click** and then
-holding Space charges correctly every time; so does pressing Enter, waiting a
-second, and then holding Space. Only the immediate keyboard follow-up fails.
-
-A human is unlikely to press Space inside a single 16 ms frame, so the severity
-is low — but it makes the keyboard path non-deterministic, and the fix is small:
-remember which key opened the charge latch, or ignore action keyups that had no
-matching keydown since `beginPlay()`.
-
-`smoke.spec.ts` works around it with `advanceFrames(page, 3)` after Enter. Delete
-that call and its comment when the latch is fixed.
-
-### 3. The canvas can latch a stale fit on a mobile viewport change
-
-Reproducible in any Chromium context created with `isMobile: true`, including the
-`mobile` project. After the viewport's aspect changes, Phaser's scale manager
-updates `game.scale.parentSize` to the new parent size but leaves
-`game.scale.displaySize` at the fit it computed from the previous one — and
-because `parentSize` now matches the DOM, its next check finds no change and it
-never corrects itself. `game.scale.refresh()` fixes it immediately.
-
-Repro:
-
-1. Open the game in a Pixel 5 context (393x851 portrait). The canvas is 393x221.
-2. Resize to 851x393 landscape and wait. The canvas stays 393x221 instead of
-   growing to 699x393.
-3. Resize back to 393x851 portrait. The canvas is now **699x393 at x = -229** —
-   it overhangs both edges and roughly 44 % of the world is off-screen. Input
-   still works within the visible area.
-
-Desktop Chromium and Firefox re-fit correctly within about 200 ms; adding
-`hasTouch: true` alone does not reproduce it, only `isMobile: true`. It needs
-confirming on real hardware — a physical orientation change is the scenario this
-models, and it is a bad one if it holds. A defensive `game.scale.refresh()` on
-`resize`/`orientationchange` would close it either way.
-
-Because of this the canvas-geometry assertion in "survives a resize mid-run" is
-skipped on the mobile project; the run-integrity and overflow assertions still
-run everywhere.
+In a Chromium context with `isMobile: true`, an orientation change could leave
+the scale manager's recorded parent size matching the DOM while its computed
+display size still reflected the previous orientation. Its own change detection
+then found nothing to do and never corrected itself: rotating a Pixel 5 to
+landscape and back left the canvas at 699x393 positioned at x = -229, with
+roughly 44% of the world off-screen. The application controller now calls
+`scale.refresh()` on `resize` and `orientationchange`, with two short follow-up
+refreshes because some browsers report the new viewport a frame or two after the
+event. The canvas re-fit assertion in `responsive.spec.ts` runs on every project
+rather than skipping mobile.

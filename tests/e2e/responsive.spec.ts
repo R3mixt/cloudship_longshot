@@ -96,7 +96,7 @@ test.describe('responsive layout', () => {
     });
   }
 
-  test('survives a resize mid-run', async ({ page, isMobile }) => {
+  test('survives a resize mid-run', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await bootGame(page);
 
@@ -116,12 +116,6 @@ test.describe('responsive layout', () => {
 
     const report = await measure(page);
     expect(report.scrollWidth).toBeLessThanOrEqual(report.clientWidth);
-
-    // The canvas must also re-fit. That check is desktop-only: under a mobile
-    // context the scale manager can latch the fit it computed from an
-    // intermediate parent size and never re-check, leaving the canvas at the
-    // previous orientation's size. See docs/E2E_NOTES.md, "Known issues".
-    if (isMobile) return;
 
     // Phaser re-fits on a throttled interval rather than inside the resize
     // event, so the frame right after a resize is legitimately mid-transition.

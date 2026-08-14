@@ -1,0 +1,35 @@
+{
+  "name": "cloudship-longshot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A launch-and-fly pixel arcade game set in the Cradle universe.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,css}\" \"tests/**/*.ts\"",
+    "art": "node tools/art/build-art.mjs",
+    "sim": "node --experimental-strip-types tools/sim/run-sim.mts"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "jsdom": "^26.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
+  }
+}

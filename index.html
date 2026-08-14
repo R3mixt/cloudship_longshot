@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#070b1c" />
+    <meta
+      name="description"
+      content="Cloudship Longshot — launch your technique from the deck of a cloudship and see how far it flies."
+    />
+    <title>Cloudship Longshot</title>
+    <link rel="icon" href="data:," />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #070b1c;
+        touch-action: none;
+        overscroll-behavior: none;
+        font-family: ui-monospace, 'Cascadia Mono', Menlo, monospace;
+        color: #dfe6ff;
+      }
+      #game {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #game canvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        display: block;
+        touch-action: none;
+      }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: #070b1c;
+        z-index: 10;
+        transition: opacity 0.3s ease-out;
+      }
+      #boot-splash.gone {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot-splash h1 {
+        font-size: 15px;
+        letter-spacing: 2px;
+        color: #ffd876;
+        font-weight: normal;
+      }
+      #boot-splash p {
+        font-size: 10px;
+        color: #6a7ab0;
+      }
+      noscript {
+        display: block;
+        padding: 24px;
+        text-align: center;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="boot-splash">
+      <h1>CLOUDSHIP LONGSHOT</h1>
+      <p>loading…</p>
+    </div>
+    <noscript>Cloudship Longshot needs JavaScript enabled to run.</noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

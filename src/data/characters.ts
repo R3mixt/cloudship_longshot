@@ -33,73 +33,6 @@ export interface CharacterDef {
   noRecords?: boolean;
 }
 
-export const CHARACTER_ORDER: CharacterId[] = ['lindon', 'yerin', 'mercy', 'ziel', 'eithan'];
-
-export const CHARACTERS: Record<CharacterId, CharacterDef> = {
-  lindon: {
-    id: 'lindon',
-    displayName: 'Lindon',
-    realName: 'Lindon',
-    ability: 'CONSUME',
-    verb: 'rocket',
-    trait:
-      'Locks into a straight line and accelerates like a rocket for 3s. Immune to spikes, storms and armour while burning.',
-    quote: 'Every technique is fuel for the next.',
-    palette: { projectile: '#151515', trail: '#ff4422', glow: '#ff7733', accent: '#2a1005' },
-  },
-  yerin: {
-    id: 'yerin',
-    displayName: 'Yerin',
-    realName: 'Yerin',
-    ability: 'SWORD SEEKER',
-    verb: 'hunt',
-    trait:
-      'Darts forward and strikes the first beast ahead. Cuts through storms, slices spikes, shatters armour. One prey per cast.',
-    quote: 'Point it at something and let go.',
-    palette: { projectile: '#e8e8f2', trail: '#c8c8ee', glow: '#ffffff', accent: '#c0304a' },
-  },
-  mercy: {
-    id: 'mercy',
-    displayName: 'Mercy',
-    realName: 'Mercy',
-    ability: 'SHADOW STRINGS',
-    verb: 'float',
-    trait:
-      'Strings of shadow carry the arrow: 2.5s of near-weightless glide with a gentle forward pull. The recovery tool.',
-    quote: 'It only looks like falling.',
-    palette: { projectile: '#c98aff', trail: '#8a3fff', glow: '#e0bdff', accent: '#4a1d80' },
-  },
-  ziel: {
-    id: 'ziel',
-    displayName: 'Ziel',
-    realName: 'Ziel',
-    ability: 'CONJURE FORMATION',
-    verb: 'jump',
-    trait:
-      'A rune pad flashes into being beneath the technique and slams it upward — far harder than any ground formation. Any time.',
-    quote: 'Fine. One more.',
-    palette: { projectile: '#57e08c', trail: '#2f9e5b', glow: '#a4ffcb', accent: '#0a3a22' },
-  },
-  eithan: {
-    id: 'eithan',
-    displayName: '???',
-    realName: 'Eithan',
-    ability: 'DESTROYER',
-    verb: 'erase',
-    trait: 'Ozriel does not compete.',
-    quote: 'Ah. You found me. How predictable — of me, I mean.',
-    palette: { projectile: '#14141c', trail: '#8888aa', glow: '#ccccee', accent: '#e8d44a' },
-    secret: true,
-    noRecords: true,
-  },
-};
-
-/** Characters that count toward the Eithan unlock. */
-export const UNLOCK_CHARACTERS: CharacterId[] = ['lindon', 'yerin', 'mercy', 'ziel'];
-
-/** Kilometres each of the four must reach before Eithan is revealed. */
-export const UNLOCK_KM = 100;
-
 export const ABILITY = {
   lindon: {
     /** Burn duration, seconds. */
@@ -179,3 +112,74 @@ export const ABILITY = {
     boomScore: 100,
   },
 } as const;
+
+export const CHARACTER_ORDER: CharacterId[] = ['lindon', 'yerin', 'mercy', 'ziel', 'eithan'];
+
+/**
+ * Ability descriptions quote their own tuning values so a balance change can
+ * never leave the character-select text lying to the player.
+ */
+export const CHARACTERS: Record<CharacterId, CharacterDef> = {
+  lindon: {
+    id: 'lindon',
+    displayName: 'Lindon',
+    realName: 'Lindon',
+    ability: 'CONSUME',
+    verb: 'rocket',
+    trait:
+      `Locks into a straight line and accelerates like a rocket for ${ABILITY.lindon.duration}s. Immune to spikes, storms and armour while burning.`,
+    quote: 'Every technique is fuel for the next.',
+    palette: { projectile: '#151515', trail: '#ff4422', glow: '#ff7733', accent: '#2a1005' },
+  },
+  yerin: {
+    id: 'yerin',
+    displayName: 'Yerin',
+    realName: 'Yerin',
+    ability: 'SWORD SEEKER',
+    verb: 'hunt',
+    trait:
+      'Darts forward and strikes the first beast ahead. Cuts through storms, slices spikes, shatters armour. One prey per cast.',
+    quote: 'Point it at something and let go.',
+    palette: { projectile: '#e8e8f2', trail: '#c8c8ee', glow: '#ffffff', accent: '#c0304a' },
+  },
+  mercy: {
+    id: 'mercy',
+    displayName: 'Mercy',
+    realName: 'Mercy',
+    ability: 'SHADOW STRINGS',
+    verb: 'float',
+    trait:
+      `Strings of shadow carry the arrow: ${ABILITY.mercy.duration}s of near-weightless glide with a gentle forward pull. The recovery tool.`,
+    quote: 'It only looks like falling.',
+    palette: { projectile: '#c98aff', trail: '#8a3fff', glow: '#e0bdff', accent: '#4a1d80' },
+  },
+  ziel: {
+    id: 'ziel',
+    displayName: 'Ziel',
+    realName: 'Ziel',
+    ability: 'CONJURE FORMATION',
+    verb: 'jump',
+    trait:
+      'A rune pad flashes into being beneath the technique and slams it upward — far harder than any ground formation. Any time.',
+    quote: 'Fine. One more.',
+    palette: { projectile: '#57e08c', trail: '#2f9e5b', glow: '#a4ffcb', accent: '#0a3a22' },
+  },
+  eithan: {
+    id: 'eithan',
+    displayName: '???',
+    realName: 'Eithan',
+    ability: 'DESTROYER',
+    verb: 'erase',
+    trait: 'Ozriel does not compete.',
+    quote: 'Ah. You found me. How predictable — of me, I mean.',
+    palette: { projectile: '#14141c', trail: '#8888aa', glow: '#ccccee', accent: '#e8d44a' },
+    secret: true,
+    noRecords: true,
+  },
+};
+
+/** Characters that count toward the Eithan unlock. */
+export const UNLOCK_CHARACTERS: CharacterId[] = ['lindon', 'yerin', 'mercy', 'ziel'];
+
+/** Kilometres each of the four must reach before Eithan is revealed. */
+export const UNLOCK_KM = 100;

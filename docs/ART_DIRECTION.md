@@ -1,0 +1,263 @@
+# Art Direction — Cloudship Longshot
+
+Everything in `public/assets/sprites/` is generated from source by
+`npm run art`, which runs the Python generators in `tools/art/`. The PNGs are
+committed because they are the shipped assets; the generators are committed
+because they are the editable original.
+
+---
+
+## 1. Resolution and sprite scale
+
+The game renders at a logical **320x180** and scales to the window with
+nearest-neighbour filtering. Every sprite is authored at that 1:1 scale. There
+is no supersampling, no anti-aliasing and no sub-pixel positioning anywhere in
+the art: a diagonal is a staircase, and it is meant to be.
+
+Sprite sizes are set by how much of a 320x180 frame the object is allowed to
+own, not by what would be comfortable to draw:
+
+| Asset | Frame | Share of the 320x180 view | Why this size |
+|---|---|---|---|
+| Characters | 24x28 | 7.5% x 15.5% | Four and a half heads tall. Below ~24px a realistic head stops carrying identity, so the head is deliberately oversized and the hair silhouette does the recognising. |
+| Projectiles | 16x16 | 5% | Collision radius is 3px. The sprite is five times that because glow and trail are what the eye tracks; a technique drawn at hitbox size feels weak. |
+| Blackflame surge | 24x24 | 7.5% | Exactly double the normal 6px visual core, matching the doubled collision radius. |
+| Common beasts | 32x24 | 10% x 13% | Gameplay radii run 6-14px. The frame holds the full wingspan at the top of that range plus rim. |
+| Golden beast | 40x32 | 12.5% x 18% | Bigger frame is the jackpot's first read, before the colour registers. |
+| Armoured beast | 36x28 | 11% x 15.5% | Between common and golden: mass without spectacle. |
+| Feathers | 8x8 | 2.5% | Particle debris. Any bigger and a burst becomes a wall. |
+| Aura mote / TMC | 32x24 | 10% x 13% | Radii 8-14px plus a soft halo that must not clip. |
+| Launch pad | 48x24 | 15% x 13% | Pad widths are 32-44px; the frame adds room for the light column. |
+| Storm | 64x40 | 20% x 22% | Storms are 56-92px wide in play and are drawn scaled up from this. |
+| Rock spires | 64x40 | 20% x 22% | Clusters are 26-58px wide, 12-26px tall, drawn scaled from the frame. |
+| Cloudship | 192x96 | 60% x 53% | The launch platform is the establishing shot of every run; it earns the space. |
+| Ground tiles | 16x16 | 5% | Small enough that a scatter never repeats visibly across a 320px screen. |
+| Parallax clouds | 64x24 | 20% x 13% | Five to six per band across the view. |
+| Mountain band | 256x96 | tiled | One band covers 80% of the width; two copies cover any camera position. |
+
+**Anchoring.** Ground-anchored sheets (`pad`, `spike`) place their contact line
+on the **last row** of the frame, so they draw correctly with origin `(0.5, 1)`
+at the ground Y. Everything else is centred in its frame. The cloudship's deck
+surface is at frame row 44 (`CLOUDSHIP_DECK_Y` in the manifest); character feet
+belong on that row.
+
+**Facing.** Beasts are drawn facing **left** and are never flipped — they fly
+toward the launched technique. Projectiles and characters face **right**, the
+launch direction.
+
+---
+
+## 2. Palette
+
+Defined once in `tools/art/palette.py` and imported by every generator. Naming
+is `<FAMILY>_<ROLE>` where role is `DK` (deep shadow), `SH` (shadow), `MD`
+(base), `LT` (lit face), `HI` (specular).
+
+The five character ramps are **contractual**: the runtime tints particles,
+trails, aim guides and charge pips with the exact values in
+`src/data/characters.ts` and `src/data/objects.ts`. The sprite ramps are built
+*around* those values rather than the other way round, which is why, for
+example, Lindon's `MD` is the same `#151515` the trail code reads.
+
+### Structural
+
+| Role | Hex | Notes |
+|---|---|---|
+| `OUTLINE` | `#0b0a14` | The only silhouette rim colour in the game. One rim hue across a mixed sprite set is what makes it look like one hand drew it. |
+| `OUTLINE_SOFT` | `#1b1a2c` | Interior separation lines only; never the silhouette. |
+
+### Characters (contractual values marked ●)
+
+| Character | DK | SH | MD | LT | HI | Accent |
+|---|---|---|---|---|---|---|
+| Lindon | `#080808` | `#2a1005` ● | `#151515` ● | `#ff4422` ● | `#ff7733` ● | white marble arm `#c3c8dc` |
+| Yerin | `#6f6f8e` | `#a0a0c4` | `#c8c8ee` ● | `#e8e8f2` ● | `#ffffff` ● | red `#c0304a` ● |
+| Mercy | `#331060` | `#4a1d80` ● | `#8a3fff` ● | `#c98aff` ● | `#e0bdff` ● | — |
+| Ziel | `#0a3a22` ● | `#2f9e5b` ● | `#57e08c` ● | `#a4ffcb` ● | `#e2fff0` | broken horns `#7c81a0` |
+| Eithan / Ozriel | `#0a0a10` | `#4a4a63` | `#14141c` ● | `#8888aa` ● | `#ccccee` ● | gold `#e8d44a` ● |
+
+### World
+
+| Family | DK | SH | MD | LT | HI |
+|---|---|---|---|---|---|
+| Beast plumage | `#6f6858` | `#8f8878` | `#a8a092` | `#d8d0c2` | `#f2ece0` |
+| Golden beast | `#8a5f10` | `#c08a1c` | `#e0b040` | `#ffd876` | `#fff4c8` |
+| Plated beast | `#3a3a4e` | `#5a5a72` | `#7a7a92` | `#9a9ab4` | `#c8c8dc` |
+| Thousand-Mile Cloud | `#3d7fae` | `#6bb6e0` | `#9fd8ff` | `#c6e8ff` | `#eaf7ff` |
+| Storm | `#23273a` | `#30354a` | `#3a3f52` | `#454b62` | `#5d6480` |
+| Rock / spires | `#2b2e42` | `#414459` | `#5a5e78` | `#7c81a0` | `#a8adc8` |
+| Wood / cloudship | `#2c2013` | `#463322` | `#6b5638` | `#8a7048` | `#ab8e60` |
+| Parallax cloud | `#4a628f` | `#5d7ab5` | `#7591c6` | `#9fb3dd` | `#cdd9f2` |
+| Grass | `#3d5230` | — | `#4d6a3a` | `#6d8f52` | `#7da45e` |
+| Dirt | `#332a1c` | — | `#4a3d28` | `#5d5238` | — |
+| Mountains | far `#33406e` | mid `#3d4b7e` | near `#4d5d93` | snow `#8b9cc8` | — |
+
+### Aura variants and UI
+
+| Token | Hex |
+|---|---|
+| aura charge | `#7dffb0` |
+| aura shield | `#ffd876` |
+| aura low-gravity | `#7de8ff` |
+| lightning | `#ffe9a0` |
+| UI background | `#070b1c` |
+| UI panel | `#141b3a` |
+| UI border | `#3b4a7a` |
+| UI text | `#dfe6ff` |
+| UI gold | `#ffd876` |
+| UI muted | `#8fa0d0` |
+| UI danger | `#ff7d7d` |
+| Feather tints | bone `#e8dcc8`, gold `#ffd876`, steel `#9a9ab4`, white `#ffffff` |
+
+---
+
+## 3. Readability rules
+
+These are the rules the generators actually enforce, in the order they matter.
+
+1. **Silhouette first, colour second.** Every sprite must be identifiable in
+   under 200ms at full velocity. Species and characters are separated by
+   proportion — wingspan, body mass, tail shape, neck length, hair volume —
+   before any hue is applied. Recolouring a sprite must never be the only thing
+   that tells it apart from another.
+2. **One rim colour.** A single 1px `#0b0a14` outline traces every opaque
+   cluster. The outline pass paints only *transparent* neighbours, so interior
+   detail can be laid down first without being eaten.
+3. **Parts that overlap the body get their own rim.** An arm drawn inside the
+   torso silhouette receives nothing from the whole-sprite outline pass and
+   dissolves into dark clothing. Limbs, weapons and plates are drawn on their
+   own layer, rimmed there, then composited (`stamp()` in `gen_characters.py`).
+4. **Light from the upper left, always.** Lit faces up-left, shadow down-right,
+   one specular pixel at most per form. No sprite in the game contradicts this.
+5. **Three tones minimum, five maximum, per form.** Two tones read as flat, six
+   read as mush at 24px.
+6. **Anti-banding by ordered dither, not by new colours.** Soft transitions —
+   glows, cloud undersides, light columns, storm flashes — use a 4x4 Bayer
+   stipple between two existing ramp entries. Adding an in-between colour would
+   grow the palette; stippling does not.
+7. **Stipples are clipped to the shape.** Stippling a bounding rectangle is the
+   standard way to turn a soft glow into a checkered square; `stipple_ellipse()`
+   and `dither_mask()` exist precisely to avoid it.
+8. **Shape carries meaning; hue reinforces it.** The three aura variants must be
+   distinguishable with colour removed entirely: charge is a hard plus, shield
+   is a heater-shield plate, low-gravity is three stacked up-chevrons. The same
+   rule gives charge pips different *shapes* when full and empty, not just
+   different brightness.
+9. **Depth by value, not blur.** Parallax layers move toward the sky's own blue
+   with distance and narrow their internal contrast. No far layer is allowed a
+   highlight brighter than the nearest layer's midtone.
+10. **Every animation frame must still read as the object.** A flap cycle
+    sampled from a raw cosine parks two of six frames where the wing lies along
+    the body and the beast stops looking like a beast; the sampling curve is
+    biased toward the extremes to prevent that.
+11. **Faces are two pixels.** At 24x28 anything more becomes noise. Hair is
+    always cut above the eye line so a fringe can never swallow the face.
+
+---
+
+## 4. Animation timing
+
+Frame rates live in `FRAME_RATES` in `src/assets/manifest.ts` and are chosen
+against each object's implied mass. The stubby flitter and the plated beast
+share an identical 6-frame cycle and read as completely different creatures
+largely because one beats at 10fps and the other at 7.
+
+| Animation | Frames | Rate | Repeat |
+|---|---|---|---|
+| `char_idle_*` | 2 | 3 fps | loop |
+| `char_charge_*` | 2 | 8 fps | loop |
+| `char_launch_*` | 1 | — | once |
+| `char_react_*` | 2 | 6 fps | once |
+| `char_signature_*` | 1 | — | once |
+| `proj_*` | 4 | 12 fps | loop |
+| `proj_surge` | 4 | 16 fps | loop |
+| `bird_fly_0..3` | 6 | 10 fps | loop |
+| `golden_fly` | 6 | 12 fps | loop |
+| `armor_fly` | 6 | 7 fps | loop |
+| `pad_idle` | 8 | 10 fps | loop |
+| `tmc_idle` | 6 | 6 fps | loop |
+| `aura_charge` / `aura_shield` / `aura_lowgrav` | 6 | 8 fps | loop |
+| `storm_idle` | 8 | 8 fps | loop |
+| `orb_idle` | 6 | 8 fps | loop |
+| `cloudship_idle` | 4 | 4 fps | loop |
+
+`spike.png` and `clouds.png` are **not** animations — their four and six frames
+are static variants selected per instance.
+
+Two loops carry deliberate irregularity rather than a steady pulse:
+
+- **Storm lightning** strikes on frames 1 and 6 of 8, with an afterglow on
+  frame 2 and nothing at all on the rest. A flash every frame removes the
+  menace of the wait between strikes.
+- **Golden beast shimmer** is a lit band travelling nose-to-tail once per
+  cycle, so the beast reads as reflective rather than as merely bright.
+
+---
+
+## 5. Layer and z-order structure
+
+Back to front, as the renderer composites a frame:
+
+| # | Layer | Assets | Parallax |
+|---|---|---|---|
+| 0 | Sky gradient | procedural | — |
+| 1 | Star field | procedural, high altitude only | 0.03 |
+| 2 | Mountain band | `mountains.png`, tiled horizontally | 0.12 |
+| 3 | Cloud stratum, far | `clouds.png` | 0.35 |
+| 4 | Cloud stratum, mid | `clouds.png` | 0.50 |
+| 5 | Cloud stratum, near | `clouds.png` | 0.60 |
+| 6 | Ground band and tiles | `ground_tiles.png` | 1.0 |
+| 7 | Ground hazards | `spike.png`, `pad.png` | 1.0 |
+| 8 | Cloudship | `cloudship.png` | 1.0 |
+| 9 | Characters on deck | `characters.png` | 1.0 |
+| 10 | World objects | `birds`, `bird_golden`, `bird_armored`, `tmc`, `aura`, `orb`, `storm` | 1.0 |
+| 11 | Projectile trail | procedural quads | 1.0 |
+| 12 | Projectile | `projectiles.png` / `projectiles_surge.png` | 1.0 |
+| 13 | Particles | `feathers.png`, procedural motes | 1.0 |
+| 14 | Screen effects | flash, speed lines, vignette | screen space |
+| 15 | HUD and UI | `ui.png` sub-rects, DOM overlay | screen space |
+
+Within layer 10, storms draw **behind** beasts so a beast crossing a storm
+stays readable, and the golden beast draws last so its corona is never occluded.
+
+---
+
+## 6. Ground tile scatter
+
+`ground_tiles.png` is twelve 16x16 tiles in one row, split by role:
+
+- **0-4 surface** (`grass_a`, `grass_b`, `grass_c`, `grass_worn`, `grass_edge`)
+  — opaque top to bottom, grass cap over dirt. `grass_edge` thins its cap
+  across the tile for run-out ends.
+- **5-7 body** (`dirt_a`, `dirt_stone`, `dirt_root`) — opaque, used for rows
+  below the surface. `dirt_stone` carries a buried stone with a lit crown and a
+  dark bed so it sits *in* the soil rather than on it.
+- **8-11 overlay** (`rock_cluster`, `tuft_a`, `tuft_b`, `flowers`) — mostly
+  transparent, drawn on top of a surface tile.
+
+The renderer selects tiles with a **position-stable hash** of the world column,
+never with a per-frame random: a scatter reseeded each frame shimmers, and at
+320px wide that shimmer is the most distracting thing on screen. Surface
+variants carry ragged, non-repeating grass boundaries so a run of tiles never
+shows an obvious seam.
+
+---
+
+## 7. Regenerating and reviewing
+
+```
+npm run art                      # all generators, then dimension verification
+python tools/art/gen_birds.py    # one family, run from tools/art/
+python tools/art/preview.py --all 8
+```
+
+`preview.py` writes 6-8x nearest-neighbour contact sheets with frame guides and
+a checkerboard backdrop into `tools/art/preview/`. That directory is scratch
+output and is gitignored; nothing there ships.
+
+`tools/art/verify.py` runs as the last step of `npm run art`. It asserts every
+PNG's exact dimensions against a table that mirrors `src/assets/manifest.ts`,
+and flags any fully empty frame — the usual symptom of a drawing routine whose
+coordinates drifted outside its cell. A geometry mismatch between the art and
+the manifest is a load-time failure in the game, so it fails the build here
+instead.

@@ -8,7 +8,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['**/*.ts', '**/*.mts'],
+    files: ['**/*.ts', '**/*.mts', '**/*.mjs'],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2022,
@@ -31,6 +31,11 @@ export default [
         Image: 'readonly',
         URLSearchParams: 'readonly',
         process: 'readonly',
+        Buffer: 'readonly',
+        fetch: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        queueMicrotask: 'readonly',
         globalThis: 'readonly',
       },
     },

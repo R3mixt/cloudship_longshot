@@ -15,7 +15,8 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,css}\" \"tests/**/*.ts\"",
     "art": "node tools/art/build-art.mjs",
-    "sim": "vite-node tools/sim/run-sim.ts"
+    "sim": "vite-node tools/sim/run-sim.ts",
+    "screenshot": "node tools/capture/screenshot.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"

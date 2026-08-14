@@ -9,6 +9,7 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+.claude/
 test-results/
 playwright-report/
 blob-report/

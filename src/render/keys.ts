@@ -18,8 +18,6 @@ export const TEX = {
   clouds: 'clouds',
   mountains: 'mountains',
   ui: 'ui',
-  /** 1x1 white pixel, used for particles, streaks and flat fills. */
-  pixel: '__pixel',
 } as const;
 
 export type TextureKey = (typeof TEX)[keyof typeof TEX];

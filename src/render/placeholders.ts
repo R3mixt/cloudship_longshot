@@ -42,16 +42,6 @@ export function generatePlaceholders(scene: Phaser.Scene, missing: Set<string>):
       }
     }
   }
-
-  if (!scene.textures.exists(TEX.pixel)) {
-    const px = scene.textures.createCanvas(TEX.pixel, 1, 1);
-    if (px) {
-      const ctx = px.getContext();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 1, 1);
-      px.refresh();
-    }
-  }
 }
 
 type Ctx = CanvasRenderingContext2D;
@@ -147,7 +137,12 @@ function drawFrame(
 
 function rect(ctx: Ctx, x: number, y: number, w: number, h: number, color: string): void {
   ctx.fillStyle = color;
-  ctx.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
+  ctx.fillRect(
+    Math.round(x),
+    Math.round(y),
+    Math.max(1, Math.round(w)),
+    Math.max(1, Math.round(h)),
+  );
 }
 
 function glow(ctx: Ctx, w: number, h: number, color: string, alpha: number): void {
@@ -156,7 +151,15 @@ function glow(ctx: Ctx, w: number, h: number, color: string, alpha: number): voi
   ctx.globalAlpha = 1;
 }
 
-function bird(ctx: Ctx, w: number, h: number, phase: number, body: string, wing: string, species: number): void {
+function bird(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  phase: number,
+  body: string,
+  wing: string,
+  species: number,
+): void {
   const cx = w / 2;
   const cy = h / 2;
   const s = Math.min(w, h) * 0.34;
@@ -192,7 +195,14 @@ function character(ctx: Ctx, w: number, h: number, col: number, row: number): vo
   if (col === 4) glow(ctx, w, h, pal.glow, 0.4);
 }
 
-function projectile(ctx: Ctx, w: number, h: number, phase: number, body: string, glowColor: string): void {
+function projectile(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  phase: number,
+  body: string,
+  glowColor: string,
+): void {
   const cx = w / 2;
   const cy = h / 2;
   const r = Math.min(w, h) * 0.19 + Math.sin(phase) * 0.6;

@@ -16,7 +16,6 @@ interface Particle {
   kind: ParticleKind;
   phase: number;
   size: number;
-  spin: number;
 }
 
 interface Popup {
@@ -60,7 +59,6 @@ export class EffectsRenderer {
         kind: 'spark',
         phase: 0,
         size: 2,
-        spin: 0,
       });
     }
 
@@ -109,7 +107,6 @@ export class EffectsRenderer {
     p.kind = kind;
     p.phase = Math.random() * Math.PI * 2;
     p.size = size;
-    p.spin = Math.random() * 2 - 1;
   }
 
   burst(
@@ -125,7 +122,15 @@ export class EffectsRenderer {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const s = speed * (0.4 + Math.random() * 0.6);
-      this.spawn(x, y, Math.cos(a) * s, Math.sin(a) * s, color, life * (0.7 + Math.random() * 0.6), kind);
+      this.spawn(
+        x,
+        y,
+        Math.cos(a) * s,
+        Math.sin(a) * s,
+        color,
+        life * (0.7 + Math.random() * 0.6),
+        kind,
+      );
     }
   }
 

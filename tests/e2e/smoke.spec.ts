@@ -82,7 +82,7 @@ test.describe('smoke', () => {
     await expect(openDialog(page)).toHaveCount(0);
     await expectPhase(page, 'aim');
 
-    // KNOWN SOURCE ISSUE — src/scenes/gameScene.ts:210-213.
+    // KNOWN SOURCE ISSUE — src/scenes/gameScene.ts, `bindInput` (:239-242).
     // Enter and Space share one charge latch, and the keyup of the keypress
     // that activated PLAY is still queued in the engine when the run goes live.
     // Pressing Space inside that window charges and is released again in the

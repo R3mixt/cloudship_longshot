@@ -4,6 +4,7 @@ import { FEEL } from '@/data/feel';
 import { SHIP_Y, WORLD } from '@/data/world';
 import type { SimState } from '@/sim/types';
 import { ANIM, TEX } from './keys';
+import { PixelText } from './pixelText';
 import { CHARACTER_ROWS } from './sheets';
 
 /** Drawn size relative to the authored sprite. */
@@ -27,7 +28,7 @@ export class ActorRenderer {
   private projectile: Phaser.GameObjects.Sprite;
   private trail: Phaser.GameObjects.Graphics;
   private overlay: Phaser.GameObjects.Graphics;
-  private flagLabel: Phaser.GameObjects.Text;
+  private flagLabel: PixelText;
   private trailPoints: TrailPoint[] = [];
   private streaks: Array<{ x: number; y: number; length: number }> = [];
   private currentCharacter: CharacterId = 'lindon';
@@ -38,20 +39,25 @@ export class ActorRenderer {
   constructor(scene: Phaser.Scene, depth: number) {
     this.scene = scene;
     this.trail = scene.add.graphics().setDepth(depth).setScrollFactor(0);
-    this.ship = scene.add.sprite(0, 0, TEX.cloudship, 0).setDepth(depth - 1).setScrollFactor(0);
+    this.ship = scene.add
+      .sprite(0, 0, TEX.cloudship, 0)
+      .setDepth(depth - 1)
+      .setScrollFactor(0);
     this.crew = scene.add.sprite(0, 0, TEX.characters, 0).setDepth(depth).setScrollFactor(0);
     this.projectile = scene.add
       .sprite(0, 0, TEX.projectiles, 0)
       .setDepth(depth + 1)
       .setScrollFactor(0);
-    this.overlay = scene.add.graphics().setDepth(depth + 2).setScrollFactor(0);
-    this.flagLabel = scene.add
-      .text(0, 0, 'BEST', { fontFamily: 'monospace', fontSize: '6px', color: '#7dffb0' })
-      .setDepth(depth)
-      .setScrollFactor(0)
-      .setOrigin(0.5, 1)
-      .setResolution(1)
-      .setVisible(false);
+    this.overlay = scene.add
+      .graphics()
+      .setDepth(depth + 2)
+      .setScrollFactor(0);
+    this.flagLabel = new PixelText(scene, 0, 0, {
+      depth,
+      tint: 0x7dffb0,
+      originX: 0.5,
+    });
+    this.flagLabel.setText('BEST').setVisible(false);
 
     for (let i = 0; i < FEEL.speedLines.count; i++) {
       this.streaks.push({
@@ -194,13 +200,7 @@ export class ActorRenderer {
 
   // ------------------------------------------------------------------ overlay
 
-  private drawOverlay(
-    state: SimState,
-    camX: number,
-    camY: number,
-    time: number,
-    dt: number,
-  ): void {
+  private drawOverlay(state: SimState, camX: number, camY: number, time: number, dt: number): void {
     const g = this.overlay;
     g.clear();
 
@@ -233,7 +233,12 @@ export class ActorRenderer {
     if (state.phase === 'fly' && this.showSpeedLines) this.drawSpeedLines(state, g, dt);
   }
 
-  private drawAimGuide(state: SimState, x: number, y: number, g: Phaser.GameObjects.Graphics): void {
+  private drawAimGuide(
+    state: SimState,
+    x: number,
+    y: number,
+    g: Phaser.GameObjects.Graphics,
+  ): void {
     const palette = CHARACTERS[state.character].palette;
     const color = Phaser.Display.Color.HexStringToColor(palette.glow).color;
     const ax = Math.cos(state.angle);
@@ -250,7 +255,10 @@ export class ActorRenderer {
     const speed = Math.hypot(state.vx, state.vy);
     const f = FEEL.speedLines;
     if (speed < f.startSpeed) return;
-    const alpha = Math.min(f.maxAlpha, ((speed - f.startSpeed) / (f.fullSpeed - f.startSpeed)) * f.maxAlpha);
+    const alpha = Math.min(
+      f.maxAlpha,
+      ((speed - f.startSpeed) / (f.fullSpeed - f.startSpeed)) * f.maxAlpha,
+    );
     g.fillStyle(0xffffff, alpha);
     for (const s of this.streaks) {
       s.x -= speed * dt * 0.55;
@@ -278,7 +286,9 @@ export class ActorRenderer {
     this.overlay.fillStyle(0x7dffb0, 1);
     this.overlay.fillRect(Math.round(fx), Math.round(gy - 24), 1, 24);
     this.overlay.fillRect(Math.round(fx + 1), Math.round(gy - 24), 8, 5);
-    this.flagLabel.setPosition(Math.round(fx + 4), Math.round(gy - 26));
+    // PixelText anchors from the top, where the old text object anchored from
+    // its baseline, so the label height comes off the y here.
+    this.flagLabel.setPosition(Math.round(fx + 4), Math.round(gy - 26) - this.flagLabel.height);
     this.flagLabel.setVisible(true);
   }
 

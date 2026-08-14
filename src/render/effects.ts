@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { FEEL } from '@/data/feel';
 import { WORLD } from '@/data/world';
+import { PixelText } from './pixelText';
 
 export type ParticleKind = 'spark' | 'dust' | 'feather' | 'rock' | 'ember';
 
@@ -23,7 +24,7 @@ interface Popup {
   x: number;
   y: number;
   time: number;
-  text: Phaser.GameObjects.Text;
+  text: PixelText;
 }
 
 const POPUP_GOLD = /GOLDEN|PERFECT|SURGE|FORMATION|MILE|CONSUME|SEEKER|STRINGS|SHIELD|MADRA|LIGHT/;
@@ -63,20 +64,11 @@ export class EffectsRenderer {
     }
 
     for (let i = 0; i < 14; i++) {
-      const text = scene.add
-        .text(0, 0, '', {
-          fontFamily: 'monospace',
-          fontSize: '7px',
-          color: '#ffffff',
-          stroke: '#0a0f24',
-          strokeThickness: 1,
-          align: 'center',
-        })
-        .setDepth(depth + 2)
-        .setScrollFactor(0)
-        .setOrigin(0.5, 0)
-        .setResolution(1)
-        .setVisible(false);
+      const text = new PixelText(scene, 0, 0, {
+        depth: depth + 2,
+        originX: 0.5,
+      });
+      text.setVisible(false);
       this.popups.push({ active: false, x: 0, y: 0, time: 0, text });
     }
   }
@@ -168,7 +160,7 @@ export class EffectsRenderer {
     slot.y = y;
     slot.time = FEEL.popup.lifetime;
     slot.text.setText(lines.join('\n'));
-    slot.text.setColor(popupColor(lines[0]));
+    slot.text.setTint(popupColor(lines[0]));
     slot.text.setVisible(true);
   }
 
@@ -252,11 +244,11 @@ export class EffectsRenderer {
   }
 }
 
-function popupColor(line: string | undefined): string {
-  if (!line) return '#ffffff';
-  if (line.startsWith('+')) return '#7dffb0';
-  if (line.includes('DESTROYER')) return '#ccccee';
-  if (line.includes('IMPALED') || line.includes('DEFLECTED')) return '#ff7d7d';
-  if (POPUP_GOLD.test(line)) return '#ffd876';
-  return '#ffffff';
+function popupColor(line: string | undefined): number {
+  if (!line) return 0xffffff;
+  if (line.startsWith('+')) return 0x7dffb0;
+  if (line.includes('DESTROYER')) return 0xccccee;
+  if (line.includes('IMPALED') || line.includes('DEFLECTED')) return 0xff7d7d;
+  if (POPUP_GOLD.test(line)) return 0xffd876;
+  return 0xffffff;
 }

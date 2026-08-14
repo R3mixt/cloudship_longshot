@@ -9,6 +9,20 @@ import type { Simulation } from '@/sim/simulation';
 import type { AppApi, RunSummary, ScreenId, SoundFn, UiHandle } from './types';
 
 /**
+ * The largest whole-number magnification of the 320x180 frame that still fits
+ * the viewport.
+ *
+ * Floors to 1 rather than 0 on viewports smaller than the logical frame -- a
+ * zoom of 0 would render nothing at all -- and accepts overflow there, which
+ * the scale manager's centring turns into an even crop on all four sides.
+ */
+function fitZoom(): number {
+  const width = window.innerWidth || WORLD.viewWidth;
+  const height = window.innerHeight || WORLD.viewHeight;
+  return Math.max(1, Math.floor(Math.min(width / WORLD.viewWidth, height / WORLD.viewHeight)));
+}
+
+/**
  * Owns the Phaser instance, the interface layer and the navigation between
  * them. Everything that crosses between the canvas and the DOM goes through
  * here, so neither side needs to know the other exists.
@@ -52,13 +66,20 @@ export class AppController implements AppApi {
       pixelArt: true,
       antialias: false,
       roundPixels: true,
-      // Zoom is driven by the scale manager; FIT keeps the 16:9 logical frame
-      // intact on every aspect ratio rather than cropping the world.
+      // FIT would scale to fill the viewport exactly, which on most windows is
+      // a fractional factor -- 4.25x on a 765px-tall frame. Nearest-neighbour
+      // magnification at a fractional factor maps some source pixels to four
+      // screen pixels and their neighbours to five, so single-pixel detail
+      // shimmers and thin strokes thicken unevenly. NONE plus an integer zoom
+      // set by fitZoom() keeps every source pixel the same size as its
+      // neighbours; the cost is letterboxing, which is the usual pixel-art
+      // trade and reads as deliberate.
       scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.NONE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: WORLD.viewWidth,
         height: WORLD.viewHeight,
+        zoom: fitZoom(),
       },
       input: { activePointers: 2 },
       fps: { target: 60, min: 30 },
@@ -83,10 +104,19 @@ export class AppController implements AppApi {
    */
   private watchViewport(): void {
     const refresh = () => {
+      // Scale.NONE does not re-fit on its own, so the integer zoom is
+      // recomputed here rather than only at construction.
+      this.game.scale.setZoom(fitZoom());
       this.game.scale.refresh();
       // Some browsers report the new viewport a frame or two after the event.
-      setTimeout(() => this.game.scale.refresh(), 120);
-      setTimeout(() => this.game.scale.refresh(), 400);
+      setTimeout(() => {
+        this.game.scale.setZoom(fitZoom());
+        this.game.scale.refresh();
+      }, 120);
+      setTimeout(() => {
+        this.game.scale.setZoom(fitZoom());
+        this.game.scale.refresh();
+      }, 400);
     };
     window.addEventListener('resize', refresh);
     window.addEventListener('orientationchange', refresh);

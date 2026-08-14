@@ -159,6 +159,29 @@ export const SHEETS: SheetSpec[] = [
 // loaded here: the interface is a DOM layer that draws its own glyphs, so
 // fetching the sheet at boot would cost a request nothing ever reads.
 
+/**
+ * The in-world text face.
+ *
+ * Loaded as a plain image rather than a spritesheet: Phaser's RetroFont parser
+ * slices the grid itself from the base frame, and pre-cutting it would leave
+ * `textures.get(key)` pointing at frame 0 instead of the whole sheet.
+ *
+ * `cellWidth` is the advance, glyph plus its one-pixel gutter, so text laid out
+ * with it needs no kerning pass. The character order must match CHARS in
+ * tools/art/gen_font.py exactly — both are ASCII 32..126 then the two extras.
+ */
+export const FONT = {
+  key: TEX.font,
+  file: 'assets/sprites/font.png',
+  cellWidth: 6,
+  cellHeight: 8,
+  columns: 16,
+  rows: 7,
+  /** Height of the drawn glyph box inside a cell; the cap band is the top 5. */
+  glyphHeight: 7,
+  chars: Array.from({ length: 95 }, (_, i) => String.fromCharCode(32 + i)).join('') + '·…',
+} as const;
+
 /** Rows of the aura sheet, in the order the variants are laid out. */
 export const AURA_ROWS = ['charge', 'shield', 'lowgrav'] as const;
 

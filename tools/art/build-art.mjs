@@ -35,6 +35,7 @@ const GENERATORS = [
   'gen_objects.py',
   'gen_environment.py',
   'gen_ui.py',
+  'gen_font.py',
 ];
 
 /** Python on Windows is usually `python`; most other places ship `python3`. */

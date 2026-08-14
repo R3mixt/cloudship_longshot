@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { CHARACTERS } from '@/data/characters';
 import { AURA_COLORS } from '@/data/objects';
 import { TEX } from './keys';
-import { AURA_ROWS, CHARACTER_ROWS, SHEETS, type SheetSpec } from './sheets';
+import { AURA_ROWS, CHARACTER_ROWS, FONT, SHEETS, type SheetSpec } from './sheets';
 
 /**
  * Draws stand-in artwork for any spritesheet that failed to load.
@@ -42,6 +42,37 @@ export function generatePlaceholders(scene: Phaser.Scene, missing: Set<string>):
       }
     }
   }
+}
+
+/**
+ * Stand-in for a font sheet that failed to load.
+ *
+ * Every printable character becomes a hollow box. Unlike the sprite
+ * placeholders this does not try to imitate the real thing — a legible face
+ * cannot be reconstructed here without carrying a second copy of the glyph
+ * data — but it keeps the cell grid, so layout, alignment and every measurement
+ * taken off `PixelText.width` stay correct and the game remains playable.
+ */
+export function generateFontFallback(scene: Phaser.Scene): void {
+  const width = FONT.cellWidth * FONT.columns;
+  const height = FONT.cellHeight * FONT.rows;
+  const canvas = scene.textures.createCanvas(FONT.key, width, height);
+  if (!canvas) return;
+
+  const ctx = canvas.getContext();
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = '#ffffff';
+  for (let index = 0; index < FONT.chars.length; index++) {
+    // Space is blank in the real face too; a box there would word-join.
+    if (FONT.chars[index] === ' ') continue;
+    const x = (index % FONT.columns) * FONT.cellWidth;
+    const y = Math.floor(index / FONT.columns) * FONT.cellHeight;
+    ctx.fillRect(x, y, 4, 1);
+    ctx.fillRect(x, y + 4, 4, 1);
+    ctx.fillRect(x, y + 1, 1, 3);
+    ctx.fillRect(x + 3, y + 1, 1, 3);
+  }
+  canvas.refresh();
 }
 
 type Ctx = CanvasRenderingContext2D;

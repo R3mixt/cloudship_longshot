@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { ANIM, TEX } from '@/render/keys';
-import { generatePlaceholders } from '@/render/placeholders';
-import { AURA_ROWS, CHARACTER_ROWS, FRAME_RATES, SHEETS } from '@/render/sheets';
+import { registerPixelFont } from '@/render/pixelText';
+import { generateFontFallback, generatePlaceholders } from '@/render/placeholders';
+import { AURA_ROWS, CHARACTER_ROWS, FONT, FRAME_RATES, SHEETS } from '@/render/sheets';
 import { GAME_SCENE, type GameSceneData } from './gameScene';
 
 export const PRELOAD_SCENE = 'preload';
@@ -33,10 +34,16 @@ export class PreloadScene extends Phaser.Scene {
         frameHeight: sheet.frameHeight,
       });
     }
+
+    // Plain image, not a spritesheet: RetroFont.Parse cuts the grid itself.
+    this.load.image(FONT.key, FONT.file);
   }
 
   create(): void {
     generatePlaceholders(this, this.missing);
+    if (this.missing.has(FONT.key)) generateFontFallback(this);
+    // Must precede any scene that builds a PixelText.
+    registerPixelFont(this);
     this.registerAnimations();
 
     const splash = document.getElementById('boot-splash');

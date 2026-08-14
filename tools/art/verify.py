@@ -39,7 +39,13 @@ EXPECTED = {
     "clouds.png": (64, 24, 6, 1),
     "mountains.png": (256, 96, 1, 1),
     "ui.png": (128, 64, 1, 1),
+    "font.png": (6, 8, 16, 7),
 }
+
+# Sheets whose blank cells are meaningful rather than a drawing bug. The font
+# has a space glyph by definition, and its 97 characters leave the tail of the
+# 16x7 grid unused; both are empty on purpose.
+ALLOW_EMPTY_FRAMES = {"font.png"}
 
 
 def check() -> int:
@@ -58,11 +64,12 @@ def check() -> int:
                 continue
             arr = np.asarray(im.convert("RGBA"))
 
-        for r in range(rows):
-            for cidx in range(cols):
-                cell = arr[r * fh : (r + 1) * fh, cidx * fw : (cidx + 1) * fw, 3]
-                if not cell.any():
-                    problems.append(f"{name}: frame ({cidx},{r}) is empty")
+        if name not in ALLOW_EMPTY_FRAMES:
+            for r in range(rows):
+                for cidx in range(cols):
+                    cell = arr[r * fh : (r + 1) * fh, cidx * fw : (cidx + 1) * fw, 3]
+                    if not cell.any():
+                        problems.append(f"{name}: frame ({cidx},{r}) is empty")
 
         print(f"  ok  {name:24s} {want[0]:>4}x{want[1]:<4} {fw}x{fh} x {cols}x{rows}")
 

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { PHYSICS } from '@/data/physics';
 import { WORLD, altitudeMeters } from '@/data/world';
 import type { SimState } from '@/sim/types';
+import { PixelText } from './pixelText';
 
 /**
  * Diagnostics drawn behind `?debug=1`. Nothing here is constructed unless the
@@ -9,7 +10,7 @@ import type { SimState } from '@/sim/types';
  */
 export class DebugOverlay {
   private shapes: Phaser.GameObjects.Graphics;
-  private readout: Phaser.GameObjects.Text;
+  private readout: PixelText;
   private frameTimes: number[] = [];
   private showHitboxes: boolean;
   private showStats: boolean;
@@ -18,28 +19,14 @@ export class DebugOverlay {
     this.showHitboxes = showHitboxes;
     this.showStats = showStats;
     this.shapes = scene.add.graphics().setDepth(depth).setScrollFactor(0);
-    this.readout = scene.add
-      .text(WORLD.viewWidth - 3, WORLD.viewHeight - 3, '', {
-        fontFamily: 'monospace',
-        fontSize: '6px',
-        color: '#7dffb0',
-        align: 'right',
-        stroke: '#000000',
-        strokeThickness: 1,
-      })
-      .setOrigin(1, 1)
-      .setDepth(depth)
-      .setScrollFactor(0)
-      .setResolution(1);
+    this.readout = new PixelText(scene, WORLD.viewWidth - 3, 0, {
+      depth,
+      tint: 0x7dffb0,
+      originX: 1,
+    });
   }
 
-  update(
-    state: SimState,
-    camX: number,
-    camY: number,
-    delta: number,
-    particles: number,
-  ): void {
+  update(state: SimState, camX: number, camY: number, delta: number, particles: number): void {
     if (this.showStats) this.drawStats(state, delta, particles);
     if (this.showHitboxes) this.drawHitboxes(state, camX, camY);
   }
@@ -60,6 +47,9 @@ export class DebugOverlay {
         `x ${state.x.toFixed(0)}  gen ${state.generatedToX.toFixed(0)}`,
       ].join('\n'),
     );
+    // Kept pinned to the bottom-right: the block grows upward from there, and
+    // PixelText measures from its top edge.
+    this.readout.setPosition(WORLD.viewWidth - 3, WORLD.viewHeight - 3 - this.readout.height);
   }
 
   private drawHitboxes(state: SimState, camX: number, camY: number): void {

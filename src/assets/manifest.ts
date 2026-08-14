@@ -183,6 +183,11 @@ export const SPRITESHEETS: SheetDef[] = [
 export const IMAGES: ImageDef[] = [
   { key: 'mountains', url: SPRITES + 'mountains.png', width: 256, height: 96, tileableX: true },
   { key: 'ui', url: SPRITES + 'ui.png', width: 128, height: 64 },
+  // The text face: a 6x8 grid, 16 columns by 7 rows. Declared as an image
+  // rather than a sheet because Phaser's RetroFont parser cuts the grid itself
+  // and needs the whole texture as its base frame. Cell geometry and character
+  // order live in FONT in src/render/sheets.ts.
+  { key: 'font', url: SPRITES + 'font.png', width: 96, height: 56 },
 ];
 
 // --- anchors ---------------------------------------------------------------
@@ -298,14 +303,62 @@ function buildAnims(): AnimDef[] {
   });
 
   out.push(
-    { key: 'proj_surge', sheet: 'projectiles_surge', frames: [0, 1, 2, 3], frameRate: FRAME_RATES.projectileSurge, repeat: -1 },
-    { key: 'golden_fly', sheet: 'bird_golden', frames: [0, 1, 2, 3, 4, 5], frameRate: FRAME_RATES.goldenFly, repeat: -1 },
-    { key: 'armor_fly', sheet: 'bird_armored', frames: [0, 1, 2, 3, 4, 5], frameRate: FRAME_RATES.armorFly, repeat: -1 },
-    { key: 'pad_idle', sheet: 'pad', frames: [0, 1, 2, 3, 4, 5, 6, 7], frameRate: FRAME_RATES.pad, repeat: -1 },
-    { key: 'tmc_idle', sheet: 'tmc', frames: [0, 1, 2, 3, 4, 5], frameRate: FRAME_RATES.tmc, repeat: -1 },
-    { key: 'storm_idle', sheet: 'storm', frames: [0, 1, 2, 3, 4, 5, 6, 7], frameRate: FRAME_RATES.storm, repeat: -1 },
-    { key: 'orb_idle', sheet: 'orb', frames: [0, 1, 2, 3, 4, 5], frameRate: FRAME_RATES.orb, repeat: -1 },
-    { key: 'cloudship_idle', sheet: 'cloudship', frames: [0, 1, 2, 3], frameRate: FRAME_RATES.cloudship, repeat: -1 },
+    {
+      key: 'proj_surge',
+      sheet: 'projectiles_surge',
+      frames: [0, 1, 2, 3],
+      frameRate: FRAME_RATES.projectileSurge,
+      repeat: -1,
+    },
+    {
+      key: 'golden_fly',
+      sheet: 'bird_golden',
+      frames: [0, 1, 2, 3, 4, 5],
+      frameRate: FRAME_RATES.goldenFly,
+      repeat: -1,
+    },
+    {
+      key: 'armor_fly',
+      sheet: 'bird_armored',
+      frames: [0, 1, 2, 3, 4, 5],
+      frameRate: FRAME_RATES.armorFly,
+      repeat: -1,
+    },
+    {
+      key: 'pad_idle',
+      sheet: 'pad',
+      frames: [0, 1, 2, 3, 4, 5, 6, 7],
+      frameRate: FRAME_RATES.pad,
+      repeat: -1,
+    },
+    {
+      key: 'tmc_idle',
+      sheet: 'tmc',
+      frames: [0, 1, 2, 3, 4, 5],
+      frameRate: FRAME_RATES.tmc,
+      repeat: -1,
+    },
+    {
+      key: 'storm_idle',
+      sheet: 'storm',
+      frames: [0, 1, 2, 3, 4, 5, 6, 7],
+      frameRate: FRAME_RATES.storm,
+      repeat: -1,
+    },
+    {
+      key: 'orb_idle',
+      sheet: 'orb',
+      frames: [0, 1, 2, 3, 4, 5],
+      frameRate: FRAME_RATES.orb,
+      repeat: -1,
+    },
+    {
+      key: 'cloudship_idle',
+      sheet: 'cloudship',
+      frames: [0, 1, 2, 3],
+      frameRate: FRAME_RATES.cloudship,
+      repeat: -1,
+    },
   );
 
   return out;

@@ -18,6 +18,7 @@ export const TEX = {
   clouds: 'clouds',
   mountains: 'mountains',
   ui: 'ui',
+  font: 'font',
 } as const;
 
 export type TextureKey = (typeof TEX)[keyof typeof TEX];

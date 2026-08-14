@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { hash } from '@/core/rng';
 import { WORLD } from '@/data/world';
 import { TEX } from './keys';
+import { PixelText } from './pixelText';
 
 const DECOR_SPACING = 22;
 
@@ -16,7 +17,7 @@ const DECOR_SPACING = 22;
 export class GroundRenderer {
   private gfx: Phaser.GameObjects.Graphics;
   private surface: Phaser.GameObjects.TileSprite;
-  private labelPool: Phaser.GameObjects.Text[] = [];
+  private labelPool: PixelText[] = [];
   private scene: Phaser.Scene;
   private depth: number;
 
@@ -136,14 +137,10 @@ export class GroundRenderer {
     this.hideLabels(used);
   }
 
-  private getLabel(index: number): Phaser.GameObjects.Text {
+  private getLabel(index: number): PixelText {
     let label = this.labelPool[index];
     if (!label) {
-      label = this.scene.add
-        .text(0, 0, '', { fontFamily: 'monospace', fontSize: '6px', color: '#dfe6ff' })
-        .setDepth(this.depth + 2)
-        .setScrollFactor(0)
-        .setResolution(1);
+      label = new PixelText(this.scene, 0, 0, { depth: this.depth + 2, tint: 0xdfe6ff });
       this.labelPool[index] = label;
     }
     return label;
@@ -169,6 +166,8 @@ function lerpColor(a: number, b: number, t: number): number {
   const bg = (b >> 8) & 0xff;
   const bb = b & 0xff;
   return (
-    (((ar + (br - ar) * t) | 0) << 16) | (((ag + (bg - ag) * t) | 0) << 8) | ((ab + (bb - ab) * t) | 0)
+    (((ar + (br - ar) * t) | 0) << 16) |
+    (((ag + (bg - ag) * t) | 0) << 8) |
+    ((ab + (bb - ab) * t) | 0)
   );
 }

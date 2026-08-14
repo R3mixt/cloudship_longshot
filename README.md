@@ -25,9 +25,9 @@ Everything is local. No account, no server, no ads, nothing to buy.
 
 ## Screenshot
 
-The release screenshot lives at `docs/screenshot.png` and is captured from a production build at
-tagged releases. If you are reading this from a working copy before a release, the image below will
-not resolve yet.
+Captured from a production build with `npm run screenshot`, which takes the frame straight from the
+renderer at the game's native 320x180 and enlarges it by a whole-number factor, so what you see is
+exactly what the game draws.
 
 <img src="docs/screenshot.png" alt="Cloudship Longshot — a technique arcing over the endless world" width="640">
 
@@ -66,7 +66,7 @@ which character you brought.
 | **Yerin**  | `SWORD SEEKER`      | Darts forward and strikes the first beast ahead, cutting through whatever is in the way.                   |
 | **Mercy**  | `SHADOW STRINGS`    | Near-weightless glide with a gentle forward pull. The recovery tool when an arc goes wrong.                |
 | **Ziel**   | `CONJURE FORMATION` | A rune pad flashes into being beneath the technique and slams it upward, harder than any ground formation. |
-| **???**    | Locked              | A fifth character unlocks once you have reached **100 km with all four** of the above.                     |
+| **???**    | Locked              | A fifth character unlocks once you have flown **100 km in total with each** of the four above.            |
 
 Per-character personal bests are tracked separately, so there is a record to chase on each one.
 
@@ -107,7 +107,9 @@ No other tooling is required to build or play the game.
 | `npm run lint`       | Lint the whole project, warnings treated as errors                       |
 | `npm run format`     | Apply the Prettier formatting rules                                      |
 | `npm run art`        | Regenerate the pixel art from the generator scripts in `tools/art`       |
+| `npm run typecheck`  | Typecheck without building                                               |
 | `npm run sim`        | Run the headless balance simulation and print telemetry                  |
+| `npm run screenshot` | Capture `docs/screenshot.png` from a production build                    |
 
 A quick start:
 

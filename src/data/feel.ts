@@ -16,6 +16,18 @@ export const FEEL = {
     lookaheadRate: 3.5,
     /** Camera never drops so far that the ground band eats the frame. */
     groundMargin: 34,
+
+    /**
+     * Hard bounds on where the projectile may sit on screen, as fractions of the
+     * frame. Exponential smoothing lags in proportion to speed, and at Destroyer
+     * velocities that lag exceeds a whole screen width — the projectile simply
+     * left the frame. The clamp only engages once smoothing alone would lose it,
+     * so normal flight keeps the soft follow.
+     */
+    minScreenX: 0.12,
+    maxScreenX: 0.68,
+    minScreenY: 0.16,
+    maxScreenY: 0.84,
     /** Gentle zoom-out at extreme speed improves reaction time. */
     zoomSpeedStart: 900,
     zoomSpeedFull: 2600,

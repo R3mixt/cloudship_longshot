@@ -337,6 +337,22 @@ export class GameScene extends Phaser.Scene {
     const k = Math.min(1, cam.followRate * dt);
     this.camX += (targetX - this.camX) * k;
     this.camY += (targetY - this.camY) * k;
+
+    // Smoothing alone loses the projectile at high speed; clamp it back into a
+    // safe band so it is always on screen no matter how fast the run gets.
+    this.camX = clamp(
+      this.camX,
+      state.x - WORLD.viewWidth * cam.maxScreenX,
+      state.x - WORLD.viewWidth * cam.minScreenX,
+    );
+    let minY = state.y - WORLD.viewHeight * cam.maxScreenY;
+    let maxY = state.y - WORLD.viewHeight * cam.minScreenY;
+    if (!state.groundGone) {
+      const ceiling = WORLD.groundY + cam.groundMargin - WORLD.viewHeight;
+      minY = Math.min(minY, ceiling);
+      maxY = Math.min(maxY, ceiling);
+    }
+    this.camY = clamp(this.camY, minY, maxY);
   }
 
   // ---------------------------------------------------------------- feedback
@@ -605,6 +621,10 @@ export class GameScene extends Phaser.Scene {
     const altitudePart = Math.min(1, altitudeMeters(state.y) / 900);
     return Math.max(speedPart, altitudePart);
   }
+}
+
+function clamp(v: number, min: number, max: number): number {
+  return v < min ? min : v > max ? max : v;
 }
 
 function hex(color: string): number {

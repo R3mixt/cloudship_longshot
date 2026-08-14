@@ -140,16 +140,19 @@ export class ActorRenderer {
       : Phaser.Display.Color.HexStringToColor(palette.trail).color;
     const width = state.destroyer ? 5 : state.surge ? 4 : 3;
 
-    for (const point of this.trailPoints) {
+    // The trail is stroked as a continuous path rather than stamped as squares
+    // at each sample. At speed the samples are tens of pixels apart, and stamps
+    // read as a dotted line of debris instead of a streak — most visibly during
+    // the Destroyer sequence, where the projectile covers 24 px per frame.
+    for (let i = 0; i < this.trailPoints.length; i++) {
+      const point = this.trailPoints[i];
       point.alpha -= FEEL.trail.fadePerFrame;
-      if (point.alpha <= 0) continue;
-      this.trail.fillStyle(color, point.alpha * 0.7);
-      this.trail.fillRect(
-        Math.round(point.x - camX - width / 2),
-        Math.round(point.y - camY - width / 2),
-        width,
-        width,
-      );
+      const next = this.trailPoints[i + 1];
+      if (point.alpha <= 0 || !next) continue;
+      // Taper toward the tail so the streak reads as motion, not as a ribbon.
+      const taper = (i + 1) / this.trailPoints.length;
+      this.trail.lineStyle(Math.max(1, width * taper), color, point.alpha * 0.75 * taper);
+      this.trail.lineBetween(point.x - camX, point.y - camY, next.x - camX, next.y - camY);
     }
   }
 

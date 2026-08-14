@@ -1,9 +1,13 @@
 import Phaser from 'phaser';
-import { CLOUD_LAYERS, MOUNTAINS, SKY_GRADIENT, STARFIELD_ALTITUDE } from '@/data/feel';
+import { CLOUD_LAYERS, HIGH_CLOUDS, MOUNTAINS, SKY_GRADIENT, STARFIELD_ALTITUDE } from '@/data/feel';
 import { WORLD, altitudeMeters, worldYForAltitude } from '@/data/world';
 import { TEX } from './keys';
 
 const BANDS = 24;
+const CLOUDS_PER_LAYER = 7;
+const HIGH_CLOUDS_PER_BAND = 3;
+/** Enough for the authored strata plus every high band that can share a frame. */
+const CLOUD_POOL_SIZE = 84;
 
 /**
  * Sky, stars, parallax cloud strata and the distant mountain band.
@@ -39,7 +43,7 @@ export class SkyRenderer {
       .setDepth(depth + 3)
       .setScrollFactor(0);
 
-    for (let i = 0; i < CLOUD_LAYERS.length * 7; i++) {
+    for (let i = 0; i < CLOUD_POOL_SIZE; i++) {
       this.cloudPool.push(
         scene.add
           .sprite(0, 0, TEX.clouds, i % 6)
@@ -138,36 +142,113 @@ export class SkyRenderer {
 
   private drawClouds(camX: number, camY: number, voidFactor: number, time: number): void {
     let used = 0;
-    const perLayer = 7;
-
-    for (let layerIndex = 0; layerIndex < CLOUD_LAYERS.length; layerIndex++) {
-      const layer = CLOUD_LAYERS[layerIndex];
-      const sy = worldYForAltitude(layer.altitude) - camY;
-      const onScreen = voidFactor < 0.8 && sy > -40 && sy < WORLD.viewHeight + 40;
-      // Strata drift slowly on their own as well as scrolling with the camera,
-      // so a stationary aim phase still feels like moving air.
-      const scrollX = camX * layer.parallax + time * 3 * layer.parallax;
-
-      for (let i = 0; i < perLayer; i++) {
-        const sprite = this.cloudPool[used++];
-        if (!sprite) break;
-        if (!onScreen) {
-          sprite.setVisible(false);
-          continue;
-        }
-        const spacing = 96;
-        const span = perLayer * spacing;
-        const bx = (((i * spacing - scrollX) % span) + span) % span - spacing;
-        sprite.setVisible(true);
-        sprite.setFrame((i + layerIndex * 2) % 6);
-        sprite.setTint(layer.color);
-        sprite.setAlpha(layer.alpha * (1 - voidFactor));
-        sprite.setScale(1 + layerIndex * 0.25);
-        sprite.setPosition(Math.round(bx), Math.round(sy + ((i * 31) % 14)));
-      }
+    if (voidFactor >= 0.8) {
+      this.hideClouds(0);
+      return;
     }
 
-    for (let i = used; i < this.cloudPool.length; i++) this.cloudPool[i].setVisible(false);
+    for (let i = 0; i < CLOUD_LAYERS.length; i++) {
+      const layer = CLOUD_LAYERS[i];
+      used = this.drawStratum(
+        used,
+        worldYForAltitude(layer.altitude) - camY,
+        layer.parallax,
+        layer.color,
+        layer.alpha * (1 - voidFactor),
+        1 + i * 0.25,
+        i,
+        camX,
+        time,
+        CLOUDS_PER_LAYER,
+        96,
+      );
+    }
+
+    used = this.drawHighStrata(used, camX, camY, voidFactor, time);
+    this.hideClouds(used);
+  }
+
+  /** Renders whichever generated high-altitude bands fall inside the frame. */
+  private drawHighStrata(
+    used: number,
+    camX: number,
+    camY: number,
+    voidFactor: number,
+    time: number,
+  ): number {
+    const h = HIGH_CLOUDS;
+    const topAltitude = altitudeMeters(camY);
+    const bottomAltitude = altitudeMeters(camY + WORLD.viewHeight);
+    if (topAltitude < h.startAltitude) return used;
+
+    const first = Math.max(0, Math.floor((bottomAltitude - h.startAltitude) / h.spacing));
+    const last = Math.ceil((topAltitude - h.startAltitude) / h.spacing);
+
+    for (let band = first; band <= last; band++) {
+      const altitude = h.startAltitude + band * h.spacing;
+      if (altitude > h.endAltitude) break;
+      const t = Math.min(1, (altitude - h.startAltitude) / (h.endAltitude - h.startAltitude));
+      const alpha = (h.startAlpha + (h.endAlpha - h.startAlpha) * t) * (1 - voidFactor);
+      if (alpha <= 0.02) continue;
+      used = this.drawStratum(
+        used,
+        worldYForAltitude(altitude) - camY,
+        Math.min(h.maxParallax, h.baseParallax + band * h.parallaxPerBand),
+        lerpColor(h.nearColor, h.farColor, t),
+        alpha,
+        1.3 + (band % 3) * 0.3,
+        band + 3,
+        camX,
+        time,
+        // High bands are sparse: they are altitude cues, not weather, and a
+        // dense band tiles into a solid bar.
+        HIGH_CLOUDS_PER_BAND,
+        168,
+      );
+      if (used >= this.cloudPool.length) break;
+    }
+    return used;
+  }
+
+  private drawStratum(
+    used: number,
+    screenY: number,
+    parallax: number,
+    color: number,
+    alpha: number,
+    scale: number,
+    variant: number,
+    camX: number,
+    time: number,
+    count: number,
+    spacing: number,
+  ): number {
+    if (screenY < -40 || screenY > WORLD.viewHeight + 40) return used;
+    // Strata drift slowly on their own as well as scrolling with the camera, so
+    // a stationary aim phase still feels like moving air.
+    const scrollX = camX * parallax + time * 3 * parallax;
+    const span = count * spacing;
+
+    for (let i = 0; i < count; i++) {
+      const sprite = this.cloudPool[used];
+      if (!sprite) break;
+      used++;
+      const offset = ((variant * 37 + i * 53) % 61) - 30;
+      const bx = (((i * spacing + offset - scrollX) % span) + span) % span - spacing;
+      sprite.setVisible(true);
+      sprite.setFrame((i + variant * 2) % 6);
+      sprite.setTint(color);
+      sprite.setAlpha(alpha);
+      sprite.setScale(scale);
+      // Scattering each cloud vertically stops a stratum from fusing into one
+      // continuous horizontal bar across the frame.
+      sprite.setPosition(Math.round(bx), Math.round(screenY + (((variant * 29 + i * 47) % 21) - 10)));
+    }
+    return used;
+  }
+
+  private hideClouds(from: number): void {
+    for (let i = from; i < this.cloudPool.length; i++) this.cloudPool[i].setVisible(false);
   }
 
   destroy(): void {
@@ -180,6 +261,17 @@ export class SkyRenderer {
   }
 }
 
+function lerpColor(a: number, b: number, t: number): number {
+  const ar = (a >> 16) & 0xff;
+  const ag = (a >> 8) & 0xff;
+  const ab = a & 0xff;
+  return rgb(
+    ar + (((b >> 16) & 0xff) - ar) * t,
+    ag + (((b >> 8) & 0xff) - ag) * t,
+    ab + ((b & 0xff) - ab) * t,
+  );
+}
+
 function rgb(r: number, g: number, b: number): number {
-  return ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+  return (((r | 0) & 0xff) << 16) | (((g | 0) & 0xff) << 8) | ((b | 0) & 0xff);
 }

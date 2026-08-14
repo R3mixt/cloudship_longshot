@@ -90,11 +90,41 @@ export const SKY_GRADIENT: Array<[number, number, number, number]> = [
 /** Altitude in metres above which stars become visible. */
 export const STARFIELD_ALTITUDE = 1000;
 
-/** Parallax cloud strata: altitude in metres, scroll factor, tint. */
+/**
+ * The low, authored cloud strata that sit around the cloudship's own altitude.
+ * These are the ones the player launches through, so their heights are fixed.
+ */
 export const CLOUD_LAYERS = [
   { altitude: 150 / 9, parallax: 0.35, color: 0x7591c6, alpha: 1 },
   { altitude: 300 / 9, parallax: 0.5, color: 0x5d7ab5, alpha: 1 },
   { altitude: 520 / 9, parallax: 0.6, color: 0x4a628f, alpha: 1 },
 ] as const;
+
+/**
+ * Above the authored strata the sky repeats forever, so its clouds are
+ * generated per altitude band rather than listed.
+ *
+ * A fixed list left long gaps between layers: at 280 m the nearest stratum was
+ * 20 m away and the whole frame was flat blue, which made a hard-won climb feel
+ * like it had left the world rather than risen through it. Banding by altitude
+ * guarantees there is always something to measure height against, and fading
+ * with altitude keeps the high air reading as thin rather than as weather.
+ */
+export const HIGH_CLOUDS = {
+  /** Bands begin above the highest spawn altitude. */
+  startAltitude: 88,
+  /** Metres between bands. Comfortably under one viewport height (20 m). */
+  spacing: 14,
+  /** Bands stop once the starfield has taken over. */
+  endAltitude: 1400,
+  baseParallax: 0.66,
+  parallaxPerBand: 0.004,
+  maxParallax: 0.92,
+  /** Opacity fades from this to nothing across the band range. */
+  startAlpha: 0.8,
+  endAlpha: 0.14,
+  nearColor: 0x53709f,
+  farColor: 0x2f3d60,
+} as const;
 
 export const MOUNTAINS = { parallax: 0.12, spacing: 90, minHeight: 45, heightSpread: 40 } as const;

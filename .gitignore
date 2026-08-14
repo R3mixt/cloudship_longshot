@@ -16,3 +16,6 @@ blob-report/
 tools/sim/out/
 *.log
 npm-debug.log*
+
+# Art contact sheets are scratch output of tools/art/preview.py.
+tools/art/preview/

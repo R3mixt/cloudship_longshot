@@ -77,8 +77,11 @@ function decideAbility(sim: Simulation, skill: number, rng: Rng): void {
       if (!s.surge && altitude > 20 && sim.speed > 260) sim.useAbility();
       break;
     case 'yerin':
-      // Hunt when there is prey ahead, or as a last resort near the ground.
-      if (!s.seek && (hasPreyAhead(sim) || (falling && altitude < 22))) sim.useAbility();
+      // Best play combines both halves of the hunt: it is a fall recovery *and*
+      // a guaranteed strike, so it is worth most when the technique is already
+      // descending with prey in range. Firing it flat and early wastes the
+      // levelling-out half of the cast.
+      if (!s.seek && falling && (hasPreyAhead(sim) || altitude < 26)) sim.useAbility();
       break;
     case 'mercy':
       // Strings are a fall arrest: cast them on the way down, not on the way up.

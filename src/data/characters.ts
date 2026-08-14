@@ -103,9 +103,9 @@ export const UNLOCK_KM = 100;
 export const ABILITY = {
   lindon: {
     /** Burn duration, seconds. */
-    duration: 3.0,
+    duration: 2.2,
     /** Forward acceleration applied for the whole burn, px/s². */
-    accel: 140,
+    accel: 108,
     /** Speed floor when the burn starts. */
     minSpeed: 320,
     /** Fallback heading if the technique is nearly stationary. */
@@ -119,27 +119,35 @@ export const ABILITY = {
     rareBonus: 250,
   },
   yerin: {
-    duration: 2.5,
+    duration: 3.0,
     /** Dart speed floor — the hunt always levels out fast. */
-    minSpeed: 650,
+    minSpeed: 800,
     /** Lock-on radius, px. */
-    lockRange: 440,
+    lockRange: 490,
     /** A target must be at least this far ahead to be eligible. Never hunts backwards. */
     minLeadX: 6,
     /** Distance behind the projectile at which a lock is dropped. */
     dropBehindX: 4,
-    boostAbsorb: 0.5,
-    tmcBonus: 150,
-    rareBonus: 200,
+    /**
+     * A seeker strike converts its prey's boost at more than face value. The
+     * hunt costs a charge and guarantees the hit, so the payoff has to be the
+     * largest single-impact gain in the game or the ability is only ever worth
+     * its 2.8 seconds of flat flight.
+     */
+    boostAbsorb: 2.0,
+    tmcBonus: 320,
+    rareBonus: 420,
+    /** Upward pop as the strike completes, so the hunt exits with room to fly. */
+    strikeExitLift: 135,
   },
   mercy: {
-    duration: 2.5,
+    duration: 3.0,
     /** Gravity multiplier while gliding. */
     gravityMultiplier: 0.14,
     /** Forward pull, px/s². */
-    forwardPull: 55,
+    forwardPull: 118,
     /** Drag multiplier while gliding. */
-    dragMultiplier: 0.45,
+    dragMultiplier: 0.32,
     /** Fall arrest: downward velocity retained at cast. */
     fallArrest: 0.3,
   },
@@ -147,9 +155,9 @@ export const ABILITY = {
     /** Multiplier on incoming |vy| — deliberately above the ground pad's 1.5. */
     bounceMultiplier: 1.7,
     /** Minimum launch speed, px/s. Above the ground pad's 300 floor. */
-    bounceFloor: 400,
+    bounceFloor: 430,
     /** Forward kick. */
-    forwardKick: 90,
+    forwardKick: 104,
     forwardMultiplier: 1.1,
     /** Visual pad effect duration. */
     fxDuration: 0.35,

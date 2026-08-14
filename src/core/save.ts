@@ -261,11 +261,22 @@ export class SaveManager {
     return { newDistanceRecord, newScoreRecord };
   }
 
-  /** Metres still required on the character furthest from the unlock. */
+  /**
+   * Progress toward revealing the fifth character, as a 0..1 fraction per
+   * character.
+   *
+   * The threshold is measured against *lifetime* distance flown rather than a
+   * single best run. The flight model's sustained equilibrium is about 105 m/s,
+   * so covering 100 km without touching down would take roughly sixteen minutes
+   * — far outside the thirty-second-to-three-minute run the game is built
+   * around. Cumulative distance keeps the number, the four-character
+   * requirement and the long-haul intent, and makes the reward something a
+   * dedicated player actually reaches.
+   */
   unlockProgress(): { unlocked: boolean; perCharacter: Array<[CharacterId, number]> } {
     const target = UNLOCK_KM * 1000;
     const perCharacter = UNLOCK_CHARACTERS.map(
-      (id) => [id, Math.min(1, this.record(id).distance / target)] as [CharacterId, number],
+      (id) => [id, Math.min(1, this.record(id).totalDistance / target)] as [CharacterId, number],
     );
     return {
       unlocked: this.data.devUnlock || perCharacter.every(([, p]) => p >= 1),

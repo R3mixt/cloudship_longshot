@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { SoundFn } from '@/app/types';
+import { birdRate } from '@/audio';
 import { debug } from '@/core/debug';
 import { save } from '@/core/save';
 import { CHARACTERS, type CharacterId } from '@/data/characters';
@@ -375,8 +376,7 @@ export class GameScene extends Phaser.Scene {
         );
         this.effects.burst(e.x, e.y, 6, 0xffffff, 'spark', 60, 0.22);
         this.popup(e);
-        // Bigger beasts sound deeper; the pitch maps linearly across the radius range.
-        sound('bird.hit', { rate: 1.35 - (size - 6) / 16 });
+        sound('bird.hit', { rate: birdRate(size) });
         break;
       }
 

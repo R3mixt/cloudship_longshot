@@ -604,8 +604,25 @@ export class Simulation {
       variant: String(o.species ?? 0),
       text: [seekerStrike ? 'SEEKER STRIKE!' : 'SURGE!', `+${pts}`],
     });
-    // One prey per cast: the strike ends the hunt.
-    if (s.seek) s.seek = null;
+    this.endHunt();
+  }
+
+  /**
+   * Ends a hunt on its one prey, carrying the accumulated speed into the
+   * projectile.
+   *
+   * Without this the strike is a dead end: the boost is folded into the hunt's
+   * speed and the hunt is then discarded on the same frame, so a successful
+   * strike paid points but no velocity — which made Yerin's ability actively
+   * worse to use near beasts, the exact opposite of a hunting technique.
+   */
+  private endHunt(): void {
+    const s = this.state;
+    if (!s.seek) return;
+    const exitSpeed = s.seek.speed;
+    s.seek = null;
+    s.vx = exitSpeed;
+    s.vy = Math.min(s.vy, -ABILITY.yerin.strikeExitLift);
   }
 
   private hitRare(o: WorldObject): void {
@@ -623,7 +640,7 @@ export class Simulation {
 
     const pts = this.award(beastPoints(OBJECTS.rare.points, s.stats.distance));
     this.emit('rare', o.x, o.y, { points: pts, magnitude: o.r, text: ['GOLDEN BEAST!', `+${pts}`] });
-    if (s.seek) s.seek = null;
+    this.endHunt();
   }
 
   private hitArmor(
@@ -648,7 +665,7 @@ export class Simulation {
         text: [surge ? 'INCINERATED' : shield ? 'SHIELDED!' : 'SHATTERED', `+${pts}`],
       });
       // Armour counts as the seeker's one prey.
-      if (s.seek) s.seek = null;
+      this.endHunt();
       return;
     }
 

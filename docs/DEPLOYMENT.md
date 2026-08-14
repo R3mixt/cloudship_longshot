@@ -24,8 +24,9 @@ The workflow has two jobs:
 5. `npm test` — the Vitest unit suite.
 6. `npm run build` with `BASE_PATH` set — typecheck plus the Vite production build into `dist/`.
 7. `touch dist/.nojekyll` — see below.
-8. `actions/configure-pages@v5` — read the repository's Pages configuration.
-9. `actions/upload-pages-artifact@v3` with `path: dist` — package `dist/` as the Pages artifact.
+8. `actions/configure-pages@v6` with `enablement: true` — read the repository's Pages configuration,
+   creating the Pages site if it does not exist yet (see §3).
+9. `actions/upload-pages-artifact@v5` with `path: dist` — package `dist/` as the Pages artifact.
 
 **`deploy`**
 
@@ -106,17 +107,29 @@ npm run preview -- --base /cradle_web_game/
 
 ---
 
-## 3. Enabling Pages (one-time, repository owner)
+## 3. Enabling Pages
 
-The workflow cannot switch Pages on for you — it needs the repository to be configured to accept
-Actions-based deployments first.
+The `Configure Pages` step passes `enablement: true`, so in the normal case the workflow creates the
+Pages site itself on the first run and there is nothing to do but push.
 
-1. Push the repository to GitHub.
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, set **Source** to **GitHub Actions**. Do _not_ pick "Deploy from
+That call needs the workflow token to be allowed to administer Pages. If it is not — some
+organisation policies withhold it — the step fails with `Get Pages site failed … Not Found`, and
+Pages has to be switched on by hand once:
+
+1. Go to **Settings → Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**. Do _not_ pick "Deploy from
    a branch".
-4. Re-run the deploy workflow (**Actions → Deploy to GitHub Pages → Run workflow**) or push a commit
+3. Re-run the deploy workflow (**Actions → Deploy to GitHub Pages → Run workflow**) or push a commit
    to the default branch.
+
+GitHub offers "Static HTML" and "GitHub Pages Jekyll" starter workflows when you select that source.
+Ignore both — `deploy.yml` already does this job, and committing a starter workflow would put a
+second, competing deployment in the repository.
+
+While **Source** is set to "Deploy from a branch", GitHub serves the repository root verbatim. That
+publishes the _source_ `index.html`, whose `<script type="module" src="/src/main.ts">` the browser
+cannot execute, so the boot splash paints and the game never starts. A site that loads but stays on
+the splash — with `/assets/` returning 404 — is this, not a build failure.
 
 The first successful `deploy` job prints the live URL, and it also appears at the top of
 **Settings → Pages**.
@@ -191,7 +204,8 @@ The Playwright end-to-end suite (`npm run test:e2e`) drives this same build auto
 | -------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Blank page, console shows 404s for `/assets/*.js`                    | `BASE_PATH` does not match the served path                      | Set `BASE_PATH` to `/<repo>/` for a project site, `/` for a user/organisation or custom-domain site, then redeploy |
 | `Failed to load module script … MIME type "text/html"`               | The asset 404'd and Pages returned an HTML error page           | Same as above — fix the base path                                                                                  |
-| Deploy job fails: _Pages site not found_ / _Resource not accessible_ | Pages is not enabled, or Source is not set to GitHub Actions    | Settings → Pages → Source: **GitHub Actions**, then re-run the workflow                                            |
+| Build job fails: _Get Pages site failed … Not Found_                 | `enablement: true` could not create the site under this token   | Settings → Pages → Source: **GitHub Actions**, then re-run the workflow                                            |
+| Site loads but stays on the boot splash; `/assets/` 404s             | Source is still "Deploy from a branch", serving the repo root   | Settings → Pages → Source: **GitHub Actions**, then re-run the workflow                                            |
 | Deploy job fails on the OIDC token                                   | `permissions` block is missing `id-token: write`                | Restore the workflow's `permissions: { contents: read, pages: write, id-token: write }`                            |
 | `npm ci` fails with a lockfile mismatch                              | `package.json` changed without regenerating `package-lock.json` | Run `npm install` locally and commit the updated lockfile                                                          |
 | Workflow fails at the lint step                                      | Lint runs with `--max-warnings 0`                               | Run `npm run lint` locally and fix, or `npm run format` for formatting-only issues                                 |

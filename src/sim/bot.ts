@@ -77,8 +77,11 @@ function decideAbility(sim: Simulation, skill: number, rng: Rng): void {
   const altitude = altitudeMeters(s.y);
   const falling = s.vy > 0;
 
-  // Impulse casts: frequent for a novice, vanishing for an expert.
-  const impulse = (1 - skill) * 0.02;
+  // Impulse casts: frequent for a novice, vanishing for an expert. Squared so
+  // the rate collapses quickly above the midpoint — a linear falloff still burnt
+  // every charge before it mattered at moderate skill, which is not how a player
+  // who half-understands the game behaves.
+  const impulse = (1 - skill) * (1 - skill) * 0.004;
   if (rng.chance(impulse)) {
     sim.useAbility();
     return;
@@ -104,8 +107,9 @@ function decideAbility(sim: Simulation, skill: number, rng: Rng): void {
       if (s.glideTime <= 0 && falling && s.vy > 190) sim.useAbility();
       break;
     case 'ziel':
-      // The conjured pad is the spike save; it scales with incoming fall speed,
-      // so waiting until the last moment is correct play.
+      // The conjured pad is the spike save. It scales with incoming fall speed
+      // and launches from wherever it is cast, so holding until the last moment
+      // is strictly correct: casting mid-fall measurably shortens the run.
       if (falling && altitude < 14) sim.useAbility();
       break;
     default:

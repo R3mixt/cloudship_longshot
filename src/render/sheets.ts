@@ -1,0 +1,60 @@
+import { TEX } from './keys';
+
+export interface SheetSpec {
+  key: string;
+  /** Path relative to the site base. Never prefix with '/' — the site may be served from a sub-path. */
+  file: string;
+  frameWidth: number;
+  frameHeight: number;
+  /** Frames per row. */
+  columns: number;
+  /** Number of rows; one row per variant (species, character, aura type). */
+  rows: number;
+}
+
+/**
+ * The renderer's view of the sprite atlas. Frame indices are computed as
+ * `row * columns + column`, so a row is always one logical variant.
+ */
+export const SHEETS: SheetSpec[] = [
+  { key: TEX.characters, file: 'assets/sprites/characters.png', frameWidth: 24, frameHeight: 28, columns: 8, rows: 5 },
+  { key: TEX.projectiles, file: 'assets/sprites/projectiles.png', frameWidth: 16, frameHeight: 16, columns: 4, rows: 5 },
+  { key: TEX.projectilesSurge, file: 'assets/sprites/projectiles_surge.png', frameWidth: 24, frameHeight: 24, columns: 4, rows: 1 },
+  { key: TEX.birds, file: 'assets/sprites/birds.png', frameWidth: 32, frameHeight: 24, columns: 6, rows: 4 },
+  { key: TEX.birdGolden, file: 'assets/sprites/bird_golden.png', frameWidth: 40, frameHeight: 32, columns: 6, rows: 1 },
+  { key: TEX.birdArmored, file: 'assets/sprites/bird_armored.png', frameWidth: 36, frameHeight: 28, columns: 6, rows: 1 },
+  { key: TEX.feathers, file: 'assets/sprites/feathers.png', frameWidth: 8, frameHeight: 8, columns: 6, rows: 4 },
+  { key: TEX.pad, file: 'assets/sprites/pad.png', frameWidth: 48, frameHeight: 24, columns: 8, rows: 1 },
+  { key: TEX.tmc, file: 'assets/sprites/tmc.png', frameWidth: 32, frameHeight: 24, columns: 6, rows: 1 },
+  { key: TEX.aura, file: 'assets/sprites/aura.png', frameWidth: 32, frameHeight: 24, columns: 6, rows: 3 },
+  { key: TEX.storm, file: 'assets/sprites/storm.png', frameWidth: 64, frameHeight: 40, columns: 8, rows: 1 },
+  { key: TEX.spike, file: 'assets/sprites/spike.png', frameWidth: 64, frameHeight: 40, columns: 4, rows: 1 },
+  { key: TEX.orb, file: 'assets/sprites/orb.png', frameWidth: 16, frameHeight: 16, columns: 6, rows: 1 },
+  { key: TEX.cloudship, file: 'assets/sprites/cloudship.png', frameWidth: 192, frameHeight: 96, columns: 4, rows: 1 },
+  { key: TEX.groundTiles, file: 'assets/sprites/ground_tiles.png', frameWidth: 16, frameHeight: 16, columns: 12, rows: 1 },
+  { key: TEX.clouds, file: 'assets/sprites/clouds.png', frameWidth: 64, frameHeight: 24, columns: 6, rows: 1 },
+  { key: TEX.mountains, file: 'assets/sprites/mountains.png', frameWidth: 256, frameHeight: 96, columns: 1, rows: 1 },
+];
+
+/** Rows of the aura sheet, in the order the variants are laid out. */
+export const AURA_ROWS = ['charge', 'shield', 'lowgrav'] as const;
+
+/** Rows of the character and projectile sheets. */
+export const CHARACTER_ROWS = ['lindon', 'yerin', 'mercy', 'ziel', 'eithan'] as const;
+
+/** Animation frame rates, in frames per second. */
+export const FRAME_RATES = {
+  birdFly: 10,
+  goldenFly: 12,
+  armorFly: 7,
+  pad: 8,
+  tmc: 6,
+  aura: 8,
+  storm: 10,
+  orb: 8,
+  cloudship: 4,
+  projectile: 12,
+  projectileSurge: 16,
+  characterIdle: 3,
+  characterCharge: 8,
+} as const;

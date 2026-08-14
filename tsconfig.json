@@ -24,7 +24,14 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "vite/client"]
   },
-  "include": ["src", "tests", "tools", "vite.config.ts", "vitest.config.ts"]
+  "include": [
+    "src",
+    "tests",
+    "tools",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
 }

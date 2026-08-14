@@ -8,13 +8,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,css}\" \"tests/**/*.ts\"",
     "art": "node tools/art/build-art.mjs",
-    "sim": "node --experimental-strip-types tools/sim/run-sim.mts"
+    "sim": "vite-node tools/sim/run-sim.ts"
   },
   "dependencies": {
     "phaser": "^3.90.0"

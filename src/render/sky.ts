@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CLOUD_LAYERS, MOUNTAINS, SKY_GRADIENT, STARFIELD_ALTITUDE } from '@/data/feel';
 import { WORLD, altitudeMeters, worldYForAltitude } from '@/data/world';
+import { TEX } from './keys';
 
 const BANDS = 24;
 
@@ -14,15 +15,39 @@ const BANDS = 24;
 export class SkyRenderer {
   private gfx: Phaser.GameObjects.Graphics;
   private stars: Phaser.GameObjects.Graphics;
-  private clouds: Phaser.GameObjects.Graphics;
-  private mountains: Phaser.GameObjects.Graphics;
+  private mountainsNear: Phaser.GameObjects.TileSprite;
+  private mountainsFar: Phaser.GameObjects.TileSprite;
+  private cloudPool: Phaser.GameObjects.Sprite[] = [];
   private starSeed: Array<{ x: number; y: number; alpha: number }> = [];
 
   constructor(scene: Phaser.Scene, depth: number) {
     this.gfx = scene.add.graphics().setDepth(depth).setScrollFactor(0);
     this.stars = scene.add.graphics().setDepth(depth + 1).setScrollFactor(0);
-    this.mountains = scene.add.graphics().setDepth(depth + 2).setScrollFactor(0);
-    this.clouds = scene.add.graphics().setDepth(depth + 3).setScrollFactor(0);
+
+    // A far ridge tinted darker and scrolling slower gives the horizon depth
+    // without a second art asset.
+    this.mountainsFar = scene.add
+      .tileSprite(0, 0, WORLD.viewWidth, 96, TEX.mountains)
+      .setOrigin(0, 1)
+      .setDepth(depth + 2)
+      .setScrollFactor(0)
+      .setTint(0x2b3760)
+      .setScale(0.72, 0.62);
+    this.mountainsNear = scene.add
+      .tileSprite(0, 0, WORLD.viewWidth, 96, TEX.mountains)
+      .setOrigin(0, 1)
+      .setDepth(depth + 3)
+      .setScrollFactor(0);
+
+    for (let i = 0; i < CLOUD_LAYERS.length * 7; i++) {
+      this.cloudPool.push(
+        scene.add
+          .sprite(0, 0, TEX.clouds, i % 6)
+          .setDepth(depth + 4)
+          .setScrollFactor(0)
+          .setVisible(false),
+      );
+    }
 
     // Stable star field: positions are fixed once and scrolled, so stars never
     // shimmer or re-roll as the camera drifts.
@@ -95,67 +120,63 @@ export class SkyRenderer {
   }
 
   private drawMountains(camX: number, camY: number, voidFactor: number): void {
-    this.mountains.clear();
-    if (voidFactor > 0.6) return;
     const groundScreenY = WORLD.groundY - camY;
-    if (groundScreenY < -20 || groundScreenY > WORLD.viewHeight + 90) return;
+    const visible = voidFactor < 0.6 && groundScreenY > -20 && groundScreenY < WORLD.viewHeight + 110;
+    this.mountainsNear.setVisible(visible);
+    this.mountainsFar.setVisible(visible);
+    if (!visible) return;
 
     const alpha = 1 - voidFactor;
-    this.mountains.fillStyle(0x33406e, alpha);
-    for (let i = 0; i < 10; i++) {
-      const bx = (((i * MOUNTAINS.spacing - camX * MOUNTAINS.parallax) % 900) + 900) % 900 - 90;
-      const peak = MOUNTAINS.minHeight + ((i * 37) % MOUNTAINS.heightSpread);
-      this.mountains.fillTriangle(
-        bx,
-        groundScreenY,
-        bx + 42,
-        groundScreenY - peak,
-        bx + 88,
-        groundScreenY,
-      );
-    }
-    // A lighter ridge behind, offset and shorter, gives the band depth.
-    this.mountains.fillStyle(0x3d4b7d, alpha * 0.7);
-    for (let i = 0; i < 10; i++) {
-      const bx = (((i * 113 - camX * (MOUNTAINS.parallax * 0.6)) % 1130) + 1130) % 1130 - 110;
-      const peak = 26 + ((i * 53) % 26);
-      this.mountains.fillTriangle(
-        bx,
-        groundScreenY,
-        bx + 34,
-        groundScreenY - peak,
-        bx + 70,
-        groundScreenY,
-      );
-    }
+    this.mountainsFar.setPosition(0, Math.round(groundScreenY));
+    this.mountainsFar.tilePositionX = camX * MOUNTAINS.parallax * 0.55;
+    this.mountainsFar.setAlpha(alpha * 0.85);
+
+    this.mountainsNear.setPosition(0, Math.round(groundScreenY));
+    this.mountainsNear.tilePositionX = camX * MOUNTAINS.parallax;
+    this.mountainsNear.setAlpha(alpha);
   }
 
   private drawClouds(camX: number, camY: number, voidFactor: number, time: number): void {
-    this.clouds.clear();
-    if (voidFactor > 0.8) return;
-    const alpha = 1 - voidFactor;
+    let used = 0;
+    const perLayer = 7;
 
-    for (const layer of CLOUD_LAYERS) {
-      const worldY = worldYForAltitude(layer.altitude);
-      const sy = worldY - camY;
-      if (sy < -40 || sy > WORLD.viewHeight + 30) continue;
-      const scrollX = camX * layer.parallax + time * 2 * layer.parallax;
-      this.clouds.fillStyle(layer.color, layer.alpha * alpha);
-      for (let i = 0; i < 10; i++) {
-        const bx = (((i * 70 - scrollX) % 700) + 700) % 700 - 60;
-        const by = sy + ((i * 31) % 14);
-        this.clouds.fillRect(bx, by, 44, 9);
-        this.clouds.fillRect(bx + 8, by - 4, 26, 5);
-        this.clouds.fillRect(bx - 6, by + 4, 56, 6);
+    for (let layerIndex = 0; layerIndex < CLOUD_LAYERS.length; layerIndex++) {
+      const layer = CLOUD_LAYERS[layerIndex];
+      const sy = worldYForAltitude(layer.altitude) - camY;
+      const onScreen = voidFactor < 0.8 && sy > -40 && sy < WORLD.viewHeight + 40;
+      // Strata drift slowly on their own as well as scrolling with the camera,
+      // so a stationary aim phase still feels like moving air.
+      const scrollX = camX * layer.parallax + time * 3 * layer.parallax;
+
+      for (let i = 0; i < perLayer; i++) {
+        const sprite = this.cloudPool[used++];
+        if (!sprite) break;
+        if (!onScreen) {
+          sprite.setVisible(false);
+          continue;
+        }
+        const spacing = 96;
+        const span = perLayer * spacing;
+        const bx = (((i * spacing - scrollX) % span) + span) % span - spacing;
+        sprite.setVisible(true);
+        sprite.setFrame((i + layerIndex * 2) % 6);
+        sprite.setTint(layer.color);
+        sprite.setAlpha(layer.alpha * (1 - voidFactor));
+        sprite.setScale(1 + layerIndex * 0.25);
+        sprite.setPosition(Math.round(bx), Math.round(sy + ((i * 31) % 14)));
       }
     }
+
+    for (let i = used; i < this.cloudPool.length; i++) this.cloudPool[i].setVisible(false);
   }
 
   destroy(): void {
     this.gfx.destroy();
     this.stars.destroy();
-    this.clouds.destroy();
-    this.mountains.destroy();
+    this.mountainsNear.destroy();
+    this.mountainsFar.destroy();
+    for (const c of this.cloudPool) c.destroy();
+    this.cloudPool.length = 0;
   }
 }
 

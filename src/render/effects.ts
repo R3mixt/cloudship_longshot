@@ -71,13 +71,13 @@ export class EffectsRenderer {
           fontSize: '7px',
           color: '#ffffff',
           stroke: '#0a0f24',
-          strokeThickness: 2,
+          strokeThickness: 1,
           align: 'center',
         })
         .setDepth(depth + 2)
         .setScrollFactor(0)
         .setOrigin(0.5, 0)
-        .setResolution(3)
+        .setResolution(1)
         .setVisible(false);
       this.popups.push({ active: false, x: 0, y: 0, time: 0, text });
     }

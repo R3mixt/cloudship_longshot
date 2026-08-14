@@ -5,17 +5,21 @@ import { ANIM, TEX } from './keys';
 
 /**
  * Visual reference radius per object kind: the world radius at which the sprite
- * should render at 1:1. Scaling from this keeps the drawn size honest against
- * the collision radius, which matters because the player reads danger and
- * reward from apparent size.
+ * renders at 1:1.
+ *
+ * Each value is the sprite's authored artwork width divided by two, so a beast
+ * of radius r is drawn almost exactly 2r across. Keeping the drawn size honest
+ * against the collision radius matters more here than in most games — the whole
+ * skill of the game is judging which beast you can reach, and a sprite that
+ * overhangs its hitbox turns that judgement into guesswork.
  */
 const REFERENCE = {
-  bird: 9,
-  rare: 10,
-  armor: 11,
-  tmc: 11,
-  aura: 11,
-  orb: 5,
+  bird: 15,
+  rare: 19,
+  armor: 17,
+  tmc: 15,
+  aura: 15,
+  orb: 6,
 } as const;
 
 interface Slot {

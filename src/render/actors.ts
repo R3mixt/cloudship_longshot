@@ -6,6 +6,10 @@ import type { SimState } from '@/sim/types';
 import { ANIM, TEX } from './keys';
 import { CHARACTER_ROWS } from './sheets';
 
+/** Drawn size relative to the authored sprite. */
+const PROJECTILE_SCALE = 0.62;
+const SURGE_SCALE = 0.72;
+
 interface TrailPoint {
   x: number;
   y: number;
@@ -46,7 +50,7 @@ export class ActorRenderer {
       .setDepth(depth)
       .setScrollFactor(0)
       .setOrigin(0.5, 1)
-      .setResolution(3)
+      .setResolution(1)
       .setVisible(false);
 
     for (let i = 0; i < FEEL.speedLines.count; i++) {
@@ -172,13 +176,17 @@ export class ActorRenderer {
       // The scythe-streak leads its own motion; angling it to velocity sells the
       // speed far better than a static sprite.
       p.setAngle((Math.atan2(state.vy, state.vx) * 180) / Math.PI);
-      p.setScale(1.4);
+      p.setScale(SURGE_SCALE * 1.5);
       return;
     }
 
     p.setAngle(0);
-    // A subtle breathing pulse keeps the technique feeling alive at rest.
-    p.setScale(surging ? 1 : 1 + Math.sin(time * 9) * 0.04);
+    // The sprites are authored larger than the collision radius so they have room
+    // for a glow and detail; PROJECTILE_SCALE brings the drawn size back in line
+    // with what the player is actually steering. A subtle breathing pulse keeps
+    // the technique feeling alive.
+    const base = surging ? SURGE_SCALE : PROJECTILE_SCALE;
+    p.setScale(base * (surging ? 1 : 1 + Math.sin(time * 9) * 0.05));
   }
 
   // ------------------------------------------------------------------ overlay

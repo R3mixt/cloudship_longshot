@@ -30,6 +30,7 @@ export class Hud {
   private meter: Phaser.GameObjects.Graphics;
   private meterLabel: Phaser.GameObjects.Text;
   private all: Phaser.GameObjects.GameObject[] = [];
+  private visible = true;
 
   constructor(scene: Phaser.Scene, depth: number) {
     const mono = (size: number, color: string, bold = false) => ({
@@ -38,7 +39,9 @@ export class Hud {
       color,
       fontStyle: bold ? 'bold' : 'normal',
       stroke: '#0a0f24',
-      strokeThickness: 2,
+      // A one-pixel rim is enough to hold small text against a bright sky; a
+      // heavier stroke swallows the glyphs at this size.
+      strokeThickness: bold ? 2 : 1,
     });
     const make = (
       x: number,
@@ -51,7 +54,7 @@ export class Hud {
         .setDepth(depth)
         .setScrollFactor(0)
         .setOrigin(originX, 0)
-        .setResolution(3);
+        .setResolution(1);
       this.all.push(t);
       return t;
     };
@@ -75,12 +78,14 @@ export class Hud {
   }
 
   setVisible(visible: boolean): void {
+    this.visible = visible;
     for (const o of this.all) {
       (o as Phaser.GameObjects.Text).setVisible(visible);
     }
   }
 
   update(state: SimState, recordDistance: number, showAimHint: boolean): void {
+    if (!this.visible) return;
     const character = CHARACTERS[state.character];
     const glow = character.palette.glow;
 

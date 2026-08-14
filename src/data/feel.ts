@@ -84,6 +84,16 @@ export const FEEL = {
     flash: 0.12,
     sparks: 14,
   },
+
+  /**
+   * Beat between the run ending and the results panel appearing, so the last
+   * impact is actually seen. A death earns a longer pause than a quiet settle;
+   * both stay short enough that a retry is still under two seconds away.
+   */
+  runEnd: {
+    settleDelay: 0.35,
+    deathDelay: 0.7,
+  },
 } as const;
 
 /** Sky gradient: [altitude in metres, r, g, b]. Interpolated linearly between stops. */

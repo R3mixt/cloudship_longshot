@@ -73,6 +73,7 @@ export class GameScene extends Phaser.Scene {
   private keyboardCharging = false;
   private recordDistance = 0;
   private inputEnabled = false;
+  private endDelay = 0;
 
   constructor() {
     super(GAME_SCENE);
@@ -150,6 +151,7 @@ export class GameScene extends Phaser.Scene {
     this.flashTime = 0;
     this.running = true;
     this.paused = false;
+    this.endDelay = 0;
     this.pointerActive = false;
 
     this.actors.reset();
@@ -251,8 +253,16 @@ export class GameScene extends Phaser.Scene {
     let dt = Math.min(MAX_STEP, delta / 1000);
     this.elapsed += dt;
 
-    if (this.paused || !this.running) {
+    if (this.paused) {
       this.render(dt);
+      return;
+    }
+
+    // The run has ended but the world keeps drawing: particles settle, the last
+    // popup rises, and the results panel waits its beat.
+    if (!this.running) {
+      this.render(dt);
+      this.tickEndDelay(dt);
       return;
     }
 
@@ -271,9 +281,21 @@ export class GameScene extends Phaser.Scene {
 
     if (!alive && this.running) {
       this.running = false;
-      this.hud.setVisible(false);
-      this.config.onRunComplete(this.sim);
+      // Hold the frame briefly so the final burst, popup and sound land before
+      // the panel covers them.
+      this.endDelay = this.sim.state.stats.deathCause
+        ? FEEL.runEnd.deathDelay
+        : FEEL.runEnd.settleDelay;
     }
+  }
+
+  private tickEndDelay(dt: number): void {
+    if (this.endDelay <= 0) return;
+    this.endDelay -= dt;
+    if (this.endDelay > 0) return;
+    this.endDelay = 0;
+    this.hud.setVisible(false);
+    this.config.onRunComplete(this.sim);
   }
 
   private render(dt: number): void {

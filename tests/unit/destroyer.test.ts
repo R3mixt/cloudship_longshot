@@ -129,9 +129,7 @@ describe('the Destroyer sequence', () => {
     expect(sim.isFinished).toBe(true);
     // The sequence clock starts on the frame the transformation fires, so the
     // total lands within a frame or two of delay + duration.
-    expect(
-      Math.abs(sim.state.stats.flightTime - (E.triggerDelay + E.duration)),
-    ).toBeLessThan(0.1);
+    expect(Math.abs(sim.state.stats.flightTime - (E.triggerDelay + E.duration))).toBeLessThan(0.1);
   });
 
   it('ends by dissipating, never by dying', () => {
@@ -206,7 +204,13 @@ describe('Eithan records policy', () => {
     const save = new SaveManager(memoryStorage());
     const commitIfAllowed = (id: CharacterId, distance: number) => {
       if (CHARACTERS[id].noRecords) return;
-      save.commitRun(id, { distance, score: distance * 2, beasts: 3, peakAltitude: 40, topSpeed: 900 });
+      save.commitRun(id, {
+        distance,
+        score: distance * 2,
+        beasts: 3,
+        peakAltitude: 40,
+        topSpeed: 900,
+      });
     };
 
     commitIfAllowed('eithan', 250000);

@@ -43,7 +43,10 @@ export class ObjectRenderer {
   constructor(scene: Phaser.Scene, depth: number) {
     this.scene = scene;
     this.depth = depth;
-    this.reticle = scene.add.graphics().setDepth(depth + 1).setScrollFactor(0);
+    this.reticle = scene.add
+      .graphics()
+      .setDepth(depth + 1)
+      .setScrollFactor(0);
   }
 
   private acquire(index: number): Slot {

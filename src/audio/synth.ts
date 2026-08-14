@@ -104,7 +104,11 @@ export function degree(scale: readonly number[], index: number, root = ROOT_MIDI
  * and are what most impacts actually use — white noise alone reads as "hiss"
  * at 320x180, while brown noise reads as "weight".
  */
-export function createNoiseBuffer(ctx: AudioContext, seconds: number, kind: NoiseKind): AudioBuffer {
+export function createNoiseBuffer(
+  ctx: AudioContext,
+  seconds: number,
+  kind: NoiseKind,
+): AudioBuffer {
   const len = Math.max(1, Math.floor(ctx.sampleRate * seconds));
   const buffer = ctx.createBuffer(1, len, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -191,7 +195,7 @@ export function createRoomImpulse(ctx: AudioContext, seconds: number, decay: num
     for (let i = 0; i < len; i++) {
       const t = i / len;
       const env = Math.pow(1 - t, decay);
-      lp += ((Math.random() * 2 - 1) - lp) * coef;
+      lp += (Math.random() * 2 - 1 - lp) * coef;
       coef = 0.55 - 0.45 * t;
       data[i] = lp * env * 0.6;
     }

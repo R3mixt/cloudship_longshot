@@ -22,14 +22,7 @@
  */
 
 import { MusicDirector, type MusicTrack } from './music';
-import {
-  ChargeVoice,
-  LOOP_IDS,
-  RECIPES,
-  SFX_SPEC,
-  type SfxId,
-  type SfxParams,
-} from './sfx';
+import { ChargeVoice, LOOP_IDS, RECIPES, SFX_SPEC, type SfxId, type SfxParams } from './sfx';
 import { type AudioAssets, type SynthTarget, Voice, clamp, createAssets, hold } from './synth';
 
 export type { SfxId } from './sfx';

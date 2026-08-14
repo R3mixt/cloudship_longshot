@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
-import { CLOUD_LAYERS, HIGH_CLOUDS, MOUNTAINS, SKY_GRADIENT, STARFIELD_ALTITUDE } from '@/data/feel';
+import {
+  CLOUD_LAYERS,
+  HIGH_CLOUDS,
+  MOUNTAINS,
+  SKY_GRADIENT,
+  STARFIELD_ALTITUDE,
+} from '@/data/feel';
 import { WORLD, altitudeMeters, worldYForAltitude } from '@/data/world';
 import { TEX } from './keys';
 
@@ -26,7 +32,10 @@ export class SkyRenderer {
 
   constructor(scene: Phaser.Scene, depth: number) {
     this.gfx = scene.add.graphics().setDepth(depth).setScrollFactor(0);
-    this.stars = scene.add.graphics().setDepth(depth + 1).setScrollFactor(0);
+    this.stars = scene.add
+      .graphics()
+      .setDepth(depth + 1)
+      .setScrollFactor(0);
 
     // A far ridge tinted darker and scrolling slower gives the horizon depth
     // without a second art asset.
@@ -109,13 +118,10 @@ export class SkyRenderer {
     if (topAltitude < STARFIELD_ALTITUDE && voidFactor < 0.5) return;
 
     // Fade in over the last 200 m rather than popping on at the threshold.
-    const fade =
-      voidFactor > 0.5
-        ? 1
-        : Math.min(1, (topAltitude - STARFIELD_ALTITUDE) / 200);
+    const fade = voidFactor > 0.5 ? 1 : Math.min(1, (topAltitude - STARFIELD_ALTITUDE) / 200);
 
     for (const s of this.starSeed) {
-      const sx = (((s.x - camX * 0.03) % (VW + 40)) + (VW + 40)) % (VW + 40) - 20;
+      const sx = ((((s.x - camX * 0.03) % (VW + 40)) + (VW + 40)) % (VW + 40)) - 20;
       const sy = voidFactor > 0.5 ? s.y % VH : worldYForAltitude(s.y) - camY;
       if (sy < -4 || sy > VH) continue;
       this.stars.fillStyle(0xe8ecff, s.alpha * fade);
@@ -125,7 +131,8 @@ export class SkyRenderer {
 
   private drawMountains(camX: number, camY: number, voidFactor: number): void {
     const groundScreenY = WORLD.groundY - camY;
-    const visible = voidFactor < 0.6 && groundScreenY > -20 && groundScreenY < WORLD.viewHeight + 110;
+    const visible =
+      voidFactor < 0.6 && groundScreenY > -20 && groundScreenY < WORLD.viewHeight + 110;
     this.mountainsNear.setVisible(visible);
     this.mountainsFar.setVisible(visible);
     if (!visible) return;
@@ -234,7 +241,7 @@ export class SkyRenderer {
       if (!sprite) break;
       used++;
       const offset = ((variant * 37 + i * 53) % 61) - 30;
-      const bx = (((i * spacing + offset - scrollX) % span) + span) % span - spacing;
+      const bx = ((((i * spacing + offset - scrollX) % span) + span) % span) - spacing;
       sprite.setVisible(true);
       sprite.setFrame((i + variant * 2) % 6);
       sprite.setTint(color);
@@ -242,7 +249,10 @@ export class SkyRenderer {
       sprite.setScale(scale);
       // Scattering each cloud vertically stops a stratum from fusing into one
       // continuous horizontal bar across the frame.
-      sprite.setPosition(Math.round(bx), Math.round(screenY + (((variant * 29 + i * 47) % 21) - 10)));
+      sprite.setPosition(
+        Math.round(bx),
+        Math.round(screenY + (((variant * 29 + i * 47) % 21) - 10)),
+      );
     }
     return used;
   }

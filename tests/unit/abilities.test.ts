@@ -64,7 +64,11 @@ function characterFor(ability: AbilityState): 'lindon' | 'yerin' | 'mercy' | 'zi
  * projectile, and steps until the contact resolves. This is the engine behind
  * the whole interaction matrix.
  */
-function contact(ability: AbilityState, kind: ObjectKind, options: ContactOptions = {}): ContactResult {
+function contact(
+  ability: AbilityState,
+  kind: ObjectKind,
+  options: ContactOptions = {},
+): ContactResult {
   const onGround = GROUND_KINDS.includes(kind);
   const make = onGround ? groundSim : flightSim;
   const sim = make({
@@ -141,9 +145,27 @@ const MATRIX: MatrixCase[] = [
   { ability: 'none', kind: 'storm', expect: 'stormEnter', survives: true },
   { ability: 'glide', kind: 'storm', expect: 'stormEnter', survives: true },
   { ability: 'lowgrav', kind: 'storm', expect: 'stormEnter', survives: true },
-  { ability: 'consume', kind: 'storm', expect: 'stormDestroy', forbid: ['stormEnter'], survives: true },
-  { ability: 'shield', kind: 'storm', expect: 'stormDestroy', forbid: ['stormEnter'], survives: true },
-  { ability: 'seeker', kind: 'storm', expect: 'stormCut', forbid: ['stormEnter', 'stormDestroy'], survives: true },
+  {
+    ability: 'consume',
+    kind: 'storm',
+    expect: 'stormDestroy',
+    forbid: ['stormEnter'],
+    survives: true,
+  },
+  {
+    ability: 'shield',
+    kind: 'storm',
+    expect: 'stormDestroy',
+    forbid: ['stormEnter'],
+    survives: true,
+  },
+  {
+    ability: 'seeker',
+    kind: 'storm',
+    expect: 'stormCut',
+    forbid: ['stormEnter', 'stormDestroy'],
+    survives: true,
+  },
 
   // Armour above the shatter speed.
   ...ABILITY_STATES.map((ability) => ({
@@ -158,7 +180,13 @@ const MATRIX: MatrixCase[] = [
   // Armour below the shatter speed: only an ability gets through.
   { ability: 'none', kind: 'armor', expect: 'armorDeflect', survives: true, options: { vx: 200 } },
   { ability: 'glide', kind: 'armor', expect: 'armorDeflect', survives: true, options: { vx: 200 } },
-  { ability: 'lowgrav', kind: 'armor', expect: 'armorDeflect', survives: true, options: { vx: 200 } },
+  {
+    ability: 'lowgrav',
+    kind: 'armor',
+    expect: 'armorDeflect',
+    survives: true,
+    options: { vx: 200 },
+  },
   {
     ability: 'consume',
     kind: 'armor',
@@ -175,7 +203,14 @@ const MATRIX: MatrixCase[] = [
     survives: true,
     options: { vx: 200, abilitySpeed: 200 },
   },
-  { ability: 'shield', kind: 'armor', expect: 'armorShatter', forbid: ['armorDeflect'], survives: true, options: { vx: 200 } },
+  {
+    ability: 'shield',
+    kind: 'armor',
+    expect: 'armorShatter',
+    forbid: ['armorDeflect'],
+    survives: true,
+    options: { vx: 200 },
+  },
 
   // Ground formation pads trampoline everyone.
   ...ABILITY_STATES.map((ability) => ({
@@ -189,10 +224,35 @@ const MATRIX: MatrixCase[] = [
   // Rock spires: lethal unless burning, hunting or shielded.
   { ability: 'none', kind: 'spike', expect: 'spikeDeath', survives: false, options: { vy: 200 } },
   { ability: 'glide', kind: 'spike', expect: 'spikeDeath', survives: false, options: { vy: 200 } },
-  { ability: 'lowgrav', kind: 'spike', expect: 'spikeDeath', survives: false, options: { vy: 200 } },
-  { ability: 'consume', kind: 'spike', expect: 'spikeDestroy', forbid: ['spikeDeath'], survives: true },
-  { ability: 'seeker', kind: 'spike', expect: 'spikeDestroy', forbid: ['spikeDeath'], survives: true },
-  { ability: 'shield', kind: 'spike', expect: 'spikeDestroy', forbid: ['spikeDeath'], survives: true, options: { vy: 200 } },
+  {
+    ability: 'lowgrav',
+    kind: 'spike',
+    expect: 'spikeDeath',
+    survives: false,
+    options: { vy: 200 },
+  },
+  {
+    ability: 'consume',
+    kind: 'spike',
+    expect: 'spikeDestroy',
+    forbid: ['spikeDeath'],
+    survives: true,
+  },
+  {
+    ability: 'seeker',
+    kind: 'spike',
+    expect: 'spikeDestroy',
+    forbid: ['spikeDeath'],
+    survives: true,
+  },
+  {
+    ability: 'shield',
+    kind: 'spike',
+    expect: 'spikeDestroy',
+    forbid: ['spikeDeath'],
+    survives: true,
+    options: { vy: 200 },
+  },
 ];
 
 describe('the ability x object interaction matrix', () => {
@@ -270,7 +330,9 @@ describe('Lindon — CONSUME', () => {
     sim.useAbility();
     expect(sim.state.surge?.dirX).toBe(ABILITY.lindon.stallDirX);
     expect(sim.state.surge?.dirY).toBe(ABILITY.lindon.stallDirY);
-    expect(sim.state.surge?.speed).toBe(Math.max(ABILITY.lindon.stallSpeed, ABILITY.lindon.minSpeed));
+    expect(sim.state.surge?.speed).toBe(
+      Math.max(ABILITY.lindon.stallSpeed, ABILITY.lindon.minSpeed),
+    );
   });
 
   it('turns gravity and drag off for the duration', () => {
@@ -352,7 +414,8 @@ describe('Lindon — CONSUME', () => {
 
     const speedAtImpact = before + ABILITY.lindon.accel * FINE_DT;
     const boost =
-      (OBJECTS.bird.boostBase + Math.min(speedAtImpact, OBJECTS.bird.boostSpeedCap) * OBJECTS.bird.boostSpeedScale) *
+      (OBJECTS.bird.boostBase +
+        Math.min(speedAtImpact, OBJECTS.bird.boostSpeedCap) * OBJECTS.bird.boostSpeedScale) *
       (OBJECTS.bird.sizeFloor + OBJECTS.bird.sizeSpan);
     expect(sim.state.surge!.speed).toBeCloseTo(
       speedAtImpact + boost * ABILITY.lindon.boostAbsorb,
@@ -619,7 +682,11 @@ describe('Mercy — SHADOW STRINGS', () => {
     sim.useAbility();
     const dt = 1 / 60;
     sim.step(dt);
-    const expected = applyDrag(300 + ABILITY.mercy.forwardPull * dt, dt, ABILITY.mercy.dragMultiplier);
+    const expected = applyDrag(
+      300 + ABILITY.mercy.forwardPull * dt,
+      dt,
+      ABILITY.mercy.dragMultiplier,
+    );
     expect(sim.state.vx).toBeCloseTo(expected, 10);
     expect(ABILITY.mercy.forwardPull).toBeGreaterThan(0);
     expect(ABILITY.mercy.dragMultiplier).toBeLessThan(1);
@@ -1202,9 +1269,7 @@ describe('spec anchors', () => {
   });
 
   it('keeps the four ability verbs distinct', () => {
-    const verbs = ['lindon', 'yerin', 'mercy', 'ziel'].map(
-      (id) => CHARACTERS[id as 'lindon'].verb,
-    );
+    const verbs = ['lindon', 'yerin', 'mercy', 'ziel'].map((id) => CHARACTERS[id as 'lindon'].verb);
     expect(new Set(verbs).size).toBe(4);
     expect(verbs).toEqual(['rocket', 'hunt', 'float', 'jump']);
   });

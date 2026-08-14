@@ -89,8 +89,7 @@ export function migrate(raw: unknown): SaveData {
   const version = typeof data.version === 'number' ? data.version : 1;
 
   const records: Partial<Record<CharacterId, CharacterRecord>> = {};
-  const source =
-    version === 1 ? data : ((data.records as Record<string, unknown>) ?? {});
+  const source = version === 1 ? data : ((data.records as Record<string, unknown>) ?? {});
 
   for (const id of CHARACTER_ORDER) {
     const entry = source?.[id];

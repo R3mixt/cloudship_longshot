@@ -1,13 +1,5 @@
 export type ObjectKind =
-  | 'bird'
-  | 'rare'
-  | 'armor'
-  | 'orb'
-  | 'aura'
-  | 'tmc'
-  | 'storm'
-  | 'pad'
-  | 'spike';
+  'bird' | 'rare' | 'armor' | 'orb' | 'aura' | 'tmc' | 'storm' | 'pad' | 'spike';
 
 export type AuraVariant = 'charge' | 'shield' | 'lowgrav';
 

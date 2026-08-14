@@ -190,7 +190,12 @@ export class Spawner {
    * Fills the world ahead of `projectileX`, returning the new generation
    * frontier. Objects are appended to `out` in place.
    */
-  generate(out: WorldObject[], projectileX: number, generatedToX: number, destroyer: boolean): number {
+  generate(
+    out: WorldObject[],
+    projectileX: number,
+    generatedToX: number,
+    destroyer: boolean,
+  ): number {
     const R = this.rng;
     const frontier = projectileX + WORLD.viewWidth * SPAWN.lookaheadScreens;
     let genX = generatedToX;

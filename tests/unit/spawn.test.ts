@@ -319,7 +319,9 @@ describe('determinism', () => {
       const out: WorldObject[] = [];
       let genX = xAt(0);
       for (let i = 0; i < 40; i++) genX = spawner.generate(out, genX, genX, false);
-      return out.map((o) => `${o.kind}|${o.x.toFixed(6)}|${o.y.toFixed(6)}|${o.r.toFixed(6)}|${o.variant ?? ''}`);
+      return out.map(
+        (o) => `${o.kind}|${o.x.toFixed(6)}|${o.y.toFixed(6)}|${o.r.toFixed(6)}|${o.variant ?? ''}`,
+      );
     };
 
     const a = streamFor(4242);
@@ -354,7 +356,10 @@ describe('difficulty ramp', () => {
     const rampAt = (meters: number) =>
       meters <= SPAWN.hazardRampStartMeters
         ? 0
-        : Math.min(SPAWN.hazardRampMax, (meters - SPAWN.hazardRampStartMeters) * SPAWN.hazardRampPerMeter);
+        : Math.min(
+            SPAWN.hazardRampMax,
+            (meters - SPAWN.hazardRampStartMeters) * SPAWN.hazardRampPerMeter,
+          );
     expect(rampAt(0)).toBe(0);
     expect(rampAt(SPAWN.hazardRampStartMeters)).toBe(0);
     expect(rampAt(1_000_000)).toBe(SPAWN.hazardRampMax);
@@ -417,6 +422,6 @@ describe('destroyer generation', () => {
     const startX = xAt(500);
     const out: WorldObject[] = [];
     for (let i = 0; i < 300; i++) spawner.generate(out, startX, startX, true);
-    expect((countByKind(out).bird ?? 0)).toBeGreaterThan(normal);
+    expect(countByKind(out).bird ?? 0).toBeGreaterThan(normal);
   });
 });

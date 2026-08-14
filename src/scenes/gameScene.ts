@@ -531,7 +531,15 @@ export class GameScene extends Phaser.Scene {
       case 'stormDestroy':
         this.hitstopFor(OBJECTS.storm.hitstop);
         this.shakeBy(OBJECTS.storm.shake);
-        this.effects.burst(e.x, e.y, 16, e.variant === 'burn' ? 0xff7733 : 0xffd876, 'spark', 110, 0.5);
+        this.effects.burst(
+          e.x,
+          e.y,
+          16,
+          e.variant === 'burn' ? 0xff7733 : 0xffd876,
+          'spark',
+          110,
+          0.5,
+        );
         this.effects.burst(e.x, e.y, 10, 0x3a3a4a, 'dust', 80, 0.5);
         this.popup(e);
         sound('storm.destroy');

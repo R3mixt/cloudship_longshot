@@ -126,8 +126,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     realName: 'Lindon',
     ability: 'CONSUME',
     verb: 'rocket',
-    trait:
-      `Locks into a straight line and accelerates like a rocket for ${ABILITY.lindon.duration}s. Immune to spikes, storms and armour while burning.`,
+    trait: `Locks into a straight line and accelerates like a rocket for ${ABILITY.lindon.duration}s. Immune to spikes, storms and armour while burning.`,
     quote: 'Every technique is fuel for the next.',
     palette: { projectile: '#151515', trail: '#ff4422', glow: '#ff7733', accent: '#2a1005' },
   },
@@ -148,8 +147,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     realName: 'Mercy',
     ability: 'SHADOW STRINGS',
     verb: 'float',
-    trait:
-      `Strings of shadow carry the arrow: ${ABILITY.mercy.duration}s of near-weightless glide with a gentle forward pull. The recovery tool.`,
+    trait: `Strings of shadow carry the arrow: ${ABILITY.mercy.duration}s of near-weightless glide with a gentle forward pull. The recovery tool.`,
     quote: 'It only looks like falling.',
     palette: { projectile: '#c98aff', trail: '#8a3fff', glow: '#e0bdff', accent: '#4a1d80' },
   },

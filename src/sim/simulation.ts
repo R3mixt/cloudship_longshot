@@ -203,7 +203,11 @@ export class Simulation {
   private castSeeker(): void {
     const s = this.state;
     const a = ABILITY.yerin;
-    s.seek = { timeLeft: a.duration, lockedId: null, speed: Math.max(Math.hypot(s.vx, s.vy), a.minSpeed) };
+    s.seek = {
+      timeLeft: a.duration,
+      lockedId: null,
+      speed: Math.max(Math.hypot(s.vx, s.vy), a.minSpeed),
+    };
     s.vx = s.seek.speed;
     s.vy = 0;
     this.emit('ability', s.x, s.y, { variant: 'yerin', text: ['SWORD SEEKER'] });
@@ -644,7 +648,11 @@ export class Simulation {
     }
 
     const pts = this.award(beastPoints(OBJECTS.rare.points, s.stats.distance));
-    this.emit('rare', o.x, o.y, { points: pts, magnitude: o.r, text: ['GOLDEN BEAST!', `+${pts}`] });
+    this.emit('rare', o.x, o.y, {
+      points: pts,
+      magnitude: o.r,
+      text: ['GOLDEN BEAST!', `+${pts}`],
+    });
     this.endHunt();
   }
 
